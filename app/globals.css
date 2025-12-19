@@ -1,0 +1,106 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* --- Boatality Embedded Fine‑Grain Noise Background --- */
+.bg-noise {
+  background-color: var(--background);
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6eAAAACXBIWXMAAAsTAAALEwEAmpwYAAACB0lEQVR4nO3QsQ3CMBBA0Yv+/2cuSleqU9jwELyhl725LLJoPL/u114F8CbnMD4HzyBbs596k8ZZrPmSu2Ce279b9Ec/WWavOXJeayPKfcb34V3s59pf2uVHqbyfxfm/83vGN9ofuUe6b8Zxu/b/O9u41P2G8V5r50jzXmvnKPN+a+co835r5yfzrX8Zxu/b/Pt713H/82RvDDDeWGPAHDLcF8/3Gvj2DYGPAHDLcGcddwvwPwiw7gxw1wZx13C/A/CbDvDHDXBnHXYL8D8HEO42w5wZw14F8C8IcM8KcNcGcNeBfAvCHDPCnDXBnDXgXwLwjwzwpw1wZw14F8C8IcM8KcNcGcNeBfAvCHDPCnDXBnDXgXwLwjwzwpw1wZzV8AuvvZRvDDDeWGPAHDLcGcddwvQP5H8A+nvLKYAAAAASUVORK5CYII=");
+  background-size: 220px 220px;
+  background-repeat: repeat;
+  background-blend-mode: soft-light;
+}
+
+/* --- Boatality Motion System --- */
+
+/* Fade-in */
+.fade-in {
+  opacity: 0;
+  animation: fadeIn 0.6s ease forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Slide-up entry */
+.slide-up {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: slideUp 0.5s ease-out forwards;
+}
+
+@keyframes slideUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hover lift */
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-3px);
+}
+
+/* Glow hover */
+.glow-hover {
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.glow-hover:hover {
+  box-shadow: 0 0 18px rgba(200, 65, 33, 0.35);
+}
+
+/* Tap scale */
+.tap-scale {
+  transition: transform 0.1s ease;
+}
+
+.tap-scale:active {
+  transform: scale(0.96);
+}
+
+/* Reduced-motion support */
+@media (prefers-reduced-motion: reduce) {
+  .fade-in,
+  .slide-up {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .hover-lift,
+  .glow-hover,
+  .tap-scale {
+    transition: none !important;
+  }
+}
