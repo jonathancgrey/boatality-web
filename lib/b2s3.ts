@@ -14,7 +14,11 @@ if (!endpoint || !region || !accessKeyId || !secretAccessKey) {
 export const b2s3 = new S3Client({
   region,
   endpoint,
-  // Important for S3-compatible providers like Backblaze B2
   forcePathStyle: true,
   credentials: { accessKeyId, secretAccessKey },
+
+  // Important for browser presigned PUTs against some S3-compatible providers (B2):
+  // avoid flexible checksum features that introduce extra preflight requirements.
+  requestChecksumCalculation: "WHEN_REQUIRED",
+  responseChecksumValidation: "WHEN_REQUIRED",
 });

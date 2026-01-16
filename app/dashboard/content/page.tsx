@@ -13,13 +13,18 @@ import {
 type LibraryItem = {
   id: string;
   title: string;
-  content_type: "video" | "podcast" | "article" | string;
+  thumbnail_url?: string | null;
+  type: "video" | "podcast" | "article" | string;
   status: string | null;
   created_at: string;
   channels_v2?: { name?: string | null } | null;
 };
 
-export default async function ContentLibraryPage() {
+export default async function ContentLibraryPage({
+  searchParams,
+}: {
+  searchParams?: { type?: string };
+}) {
   const supabase = supabaseServer();
 
   const {
@@ -34,13 +39,20 @@ export default async function ContentLibraryPage() {
     );
   }
 
-  const { data: content } = await supabase
+  const rawType = (searchParams?.type || "all").toLowerCase();
+  const activeType =
+    rawType === "video" || rawType === "podcast" || rawType === "article"
+      ? rawType
+      : "all";
+
+  let q = supabase
     .from("content_v2")
     .select(
       `
       id,
       title,
-      content_type,
+      thumbnail_url,
+      type,
       status,
       created_at,
       channels_v2 ( name )
@@ -49,12 +61,18 @@ export default async function ContentLibraryPage() {
     .eq("creator_id", user.id)
     .order("created_at", { ascending: false });
 
+  if (activeType !== "all") {
+    q = q.eq("type", activeType);
+  }
+
+  const { data: content } = await q;
+
   const items: LibraryItem[] = content ?? [];
 
   const total = items.length;
-  const videos = items.filter((i) => i.content_type === "video").length;
-  const podcasts = items.filter((i) => i.content_type === "podcast").length;
-  const articles = items.filter((i) => i.content_type === "article").length;
+  const videos = items.filter((i) => i.type === "video").length;
+  const podcasts = items.filter((i) => i.type === "podcast").length;
+  const articles = items.filter((i) => i.type === "article").length;
 
   const renderTypeBadge = (type: string) => {
     if (type === "video") {
@@ -183,15 +201,60 @@ export default async function ContentLibraryPage() {
 
         {/* Controls */}
         <section className="flex flex-col md:flex-row md:items-center gap-4 justify-between">
-          <div className="flex-1 flex items-center gap-3">
-            <div className="relative flex-1 max-w-md">
-              <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
-                <Search className="h-4 w-4" />
-              </span>
-              <input
-                className="w-full rounded-full border border-white/15 bg-black/30 pl-10 pr-4 py-2 text-xs text-slate-50 placeholder:text-slate-400 shadow-inner shadow-black/40 outline-none focus:ring-1 focus:ring-sky-400/70"
-                placeholder="Search your titles (visual only for now)"
-              />
+          <div className="flex flex-col gap-3 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <Link
+                href="/dashboard/content?type=all"
+                className={`rounded-full px-4 py-2 text-[11px] font-semibold transition border ${
+                  activeType === "all"
+                    ? "bg-white/10 border-white/20 text-white"
+                    : "bg-white/5 border-white/10 text-white/80 hover:bg-white/10"
+                }`}
+              >
+                All
+              </Link>
+              <Link
+                href="/dashboard/content?type=video"
+                className={`rounded-full px-4 py-2 text-[11px] font-semibold transition border ${
+                  activeType === "video"
+                    ? "bg-sky-500/10 border-sky-500/30 text-sky-100"
+                    : "bg-white/5 border-white/10 text-white/80 hover:bg-white/10"
+                }`}
+              >
+                Videos
+              </Link>
+              <Link
+                href="/dashboard/content?type=podcast"
+                className={`rounded-full px-4 py-2 text-[11px] font-semibold transition border ${
+                  activeType === "podcast"
+                    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-100"
+                    : "bg-white/5 border-white/10 text-white/80 hover:bg-white/10"
+                }`}
+              >
+                Podcasts
+              </Link>
+              <Link
+                href="/dashboard/content?type=article"
+                className={`rounded-full px-4 py-2 text-[11px] font-semibold transition border ${
+                  activeType === "article"
+                    ? "bg-amber-500/10 border-amber-500/30 text-amber-100"
+                    : "bg-white/5 border-white/10 text-white/80 hover:bg-white/10"
+                }`}
+              >
+                Articles
+              </Link>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="relative flex-1 max-w-md">
+                <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+                  <Search className="h-4 w-4" />
+                </span>
+                <input
+                  className="w-full rounded-full border border-white/15 bg-black/30 pl-10 pr-4 py-2 text-xs text-slate-50 placeholder:text-slate-400 shadow-inner shadow-black/40 outline-none focus:ring-1 focus:ring-sky-400/70"
+                  placeholder="Search your titles (visual only for now)"
+                />
+              </div>
             </div>
           </div>
 
@@ -209,7 +272,9 @@ export default async function ContentLibraryPage() {
                 Recent voyages
               </h2>
               <p className="text-[11px] text-slate-200/80">
-                The latest episodes, logs, and uploads you&apos;ve shared.
+                {activeType === "all"
+                  ? "The latest episodes, logs, and uploads you’ve shared."
+                  : `Showing your latest ${activeType}s.`}
               </p>
             </div>
             <Link
@@ -222,7 +287,11 @@ export default async function ContentLibraryPage() {
 
           {items.length === 0 ? (
             <div className="px-6 py-8 text-sm text-slate-200/90">
-              <p>No uploads yet — your next adventure begins with your first post.</p>
+              <p>
+                {activeType === "all"
+                  ? "No uploads yet — your next adventure begins with your first post."
+                  : `No ${activeType}s yet — upload your first one to get started.`}
+              </p>
               <div className="mt-2">
                 <Link
                   href="/dashboard/upload"
@@ -237,8 +306,10 @@ export default async function ContentLibraryPage() {
               <table className="min-w-full text-sm">
                 <thead className="bg-white/5 text-left text-[11px] uppercase tracking-[0.16em] text-slate-200/70">
                   <tr>
-                    <th className="px-6 py-3 font-medium">Title</th>
-                    <th className="px-4 py-3 font-medium">Type</th>
+                    <th className="px-6 py-3 font-medium">Asset</th>
+                    {activeType === "all" ? (
+                      <th className="px-4 py-3 font-medium">Type</th>
+                    ) : null}
                     <th className="px-4 py-3 font-medium">Channel</th>
                     <th className="px-4 py-3 font-medium">Status</th>
                     <th className="px-4 py-3 font-medium">Created</th>
@@ -252,22 +323,40 @@ export default async function ContentLibraryPage() {
                       className="border-t border-white/8 bg-transparent transition hover:bg-white/5"
                     >
                       <td className="px-6 py-3 align-middle">
-                        <div className="flex flex-col">
-                          <Link
-                            href={`/dashboard/content/${item.id}`}
-                            className="line-clamp-1 font-medium text-slate-50 hover:text-sky-200"
-                          >
-                            {item.title}
-                          </Link>
-                          <span className="mt-0.5 text-[11px] text-slate-300/70">
-                            {item.channels_v2?.name || "No channel assigned"}
-                          </span>
+                        <div className="flex items-center gap-4">
+                          <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/5">
+                            {item.thumbnail_url ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={item.thumbnail_url}
+                                alt={item.title}
+                                className="h-full w-full object-cover"
+                                loading="lazy"
+                              />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center text-slate-300/70">
+                                <FileTextIcon className="h-5 w-5" />
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex min-w-0 flex-col">
+                            <Link
+                              href={`/dashboard/content/${item.id}`}
+                              className="line-clamp-1 font-medium text-slate-50 hover:text-sky-200"
+                            >
+                              {item.title}
+                            </Link>
+                            <span className="mt-0.5 line-clamp-1 text-[11px] text-slate-300/70">
+                              {item.channels_v2?.name || "No channel assigned"}
+                            </span>
+                          </div>
                         </div>
                       </td>
 
-                      <td className="px-4 py-3 align-middle">
-                        {renderTypeBadge(item.content_type)}
-                      </td>
+                      {activeType === "all" ? (
+                        <td className="px-4 py-3 align-middle">{renderTypeBadge(item.type)}</td>
+                      ) : null}
 
                       <td className="px-4 py-3 align-middle text-slate-200/85">
                         {item.channels_v2?.name || "—"}
