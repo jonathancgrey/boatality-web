@@ -34,9 +34,14 @@ export default function B2MultipartUploadTestPage() {
       const res = await multipartUploadToB2({
         file,
         key,
-        onProgress: (p) => setProgress(p.percent),
+        contentType: file.type || "application/octet-stream",
+        onProgress: (pct) => setProgress(pct),
         signal: abortRef.current.signal,
       });
+
+      if (!res.ok) {
+        throw new Error(res.error || "Upload failed");
+      }
 
       setResultKey(res.key);
       setStatus("done");

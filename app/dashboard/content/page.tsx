@@ -17,7 +17,7 @@ type LibraryItem = {
   type: "video" | "podcast" | "article" | string;
   status: string | null;
   created_at: string;
-  channels_v2?: { name?: string | null } | null;
+  channels_v2?: { name?: string | null }[] | null;
 };
 
 export default async function ContentLibraryPage({
@@ -348,7 +348,7 @@ export default async function ContentLibraryPage({
                               {item.title}
                             </Link>
                             <span className="mt-0.5 line-clamp-1 text-[11px] text-slate-300/70">
-                              {item.channels_v2?.name || "No channel assigned"}
+                              {item.channels_v2?.[0]?.name || "No channel assigned"}
                             </span>
                           </div>
                         </div>
@@ -359,7 +359,7 @@ export default async function ContentLibraryPage({
                       ) : null}
 
                       <td className="px-4 py-3 align-middle text-slate-200/85">
-                        {item.channels_v2?.name || "—"}
+                        {item.channels_v2?.[0]?.name || "—"}
                       </td>
 
                       <td className="px-4 py-3 align-middle">
