@@ -2,9 +2,17 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Anchor, ArrowRight, CheckCircle2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 
 export default function HomePage() {
+  return (
+    <Suspense fallback={null}>
+      <HomePageContent />
+    </Suspense>
+  );
+}
+
+function HomePageContent() {
   const searchParams = useSearchParams();
   const [role, setRole] = useState<"viewer" | "creator">("viewer");
 
