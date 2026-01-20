@@ -13,8 +13,6 @@ function safeString(v: unknown) {
 function normalizeRole(roleRaw: string | null) {
   const r = (roleRaw ?? "viewer").trim().toLowerCase();
   if (r === "creator" || r === "viewer" || r === "both") return r;
-  // Back-compat: advertiser/brand -> brand
-  if (r === "advertiser" || r === "brand" || r === "partner") return "brand";
   return "viewer";
 }
 
@@ -40,20 +38,16 @@ function normalizeCreatorLinks(input: unknown): { type: string; url: string }[] 
     const url = safeString((item as any)?.url);
     if (!url) continue;
 
-    // Basic URL sanity — allow bare domains but prefer http(s)
-    let normalizedUrl = url;
     try {
-      // If they pasted without protocol, add https:// for validation
       const withProto = /^https?:\/\//i.test(url) ? url : `https://${url}`;
       const u = new URL(withProto);
-      normalizedUrl = u.toString();
+      out.push({
+        type: (safeString((item as any)?.type) ?? "other").toLowerCase(),
+        url: u.toString(),
+      });
     } catch {
-      // skip obviously invalid URLs
       continue;
     }
-
-    const type = (safeString((item as any)?.type) ?? "other").toLowerCase();
-    out.push({ type, url: normalizedUrl });
   }
 
   return out.length ? out : null;
@@ -61,20 +55,69 @@ function normalizeCreatorLinks(input: unknown): { type: string; url: string }[] 
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json().catch(() => ({}));
+    // Support both JSON fetch() and <form> FormData submissions
+    const contentType = req.headers.get("content-type") || "";
 
-    const email = String(body?.email ?? "").trim().toLowerCase();
-    const name = safeString(body?.name) ?? safeString(body?.firstName) ?? safeString(body?.fullName);
+    let body: any = {};
+    if (contentType.includes("application/json")) {
+      body = await req.json().catch(() => ({}));
+    } else if (
+      contentType.includes("multipart/form-data") ||
+      contentType.includes("application/x-www-form-urlencoded")
+    ) {
+      const fd = await req.formData().catch(() => null);
+      if (fd) {
+        const obj: Record<string, any> = {};
+        for (const [k, v] of fd.entries()) {
+          // Convert File -> name only, keep strings as-is
+          obj[k] = typeof v === "string" ? v : (v as File).name;
+        }
+        body = obj;
+
+        // If creatorLinks comes in as a JSON string, parse it.
+        // (e.g. when a form submits a hidden input containing JSON)
+        if (typeof body.creatorLinks === "string") {
+          try {
+            body.creatorLinks = JSON.parse(body.creatorLinks);
+          } catch {
+            // ignore
+          }
+        }
+      }
+    } else {
+      // Fallback: try json, then formData
+      body = await req.json().catch(async () => {
+        const fd = await req.formData().catch(() => null);
+        if (!fd) return {};
+        const obj: Record<string, any> = {};
+        for (const [k, v] of fd.entries()) {
+          obj[k] = typeof v === "string" ? v : (v as File).name;
+        }
+        return obj;
+      });
+    }
+
+    // Accept a few common field names (back-compat)
+    const rawEmail =
+      body?.email ?? body?.Email ?? body?.userEmail ?? body?.waitlistEmail ?? "";
+
+    const email = String(rawEmail ?? "").trim().toLowerCase();
+    const name =
+      safeString(body?.name) ??
+      safeString(body?.firstName) ??
+      safeString(body?.fullName);
+
     const role = normalizeRole(String(body?.role ?? body?.signupRole ?? "viewer"));
-
-    // Viewer beta fields
     const platform = normalizePlatform(safeString(body?.platform) ?? safeString(body?.os));
-    const device_type = normalizeDeviceType(safeString(body?.deviceType) ?? safeString(body?.device));
+    const device_type = normalizeDeviceType(
+      safeString(body?.deviceType) ?? safeString(body?.device)
+    );
 
-    // Creator beta fields
-    const creator_links = normalizeCreatorLinks(body?.creatorLinks ?? body?.channelLinks ?? body?.links);
+    const creator_links = normalizeCreatorLinks(
+      body?.creatorLinks ?? body?.channelLinks ?? body?.links
+    );
 
-    const source = safeString(body?.source) ?? "marketing";
+    const source = safeString(body?.source) ?? "web";
 
     if (!email || !isValidEmail(email)) {
       return NextResponse.json({ ok: false, error: "Invalid email" }, { status: 400 });
@@ -85,7 +128,7 @@ export async function POST(req: Request) {
 
     if (!url || !serviceKey) {
       return NextResponse.json(
-        { ok: false, error: "Server misconfigured (missing Supabase env vars)" },
+        { ok: false, error: "Server misconfigured" },
         { status: 500 }
       );
     }
@@ -94,10 +137,6 @@ export async function POST(req: Request) {
       auth: { persistSession: false },
     });
 
-    // Unified beta signups table
-    // Expected columns (recommended):
-    // email (unique), name, role, platform, device_type, creator_links (jsonb), source,
-    // status (default 'pending'), approved_viewer (bool), approved_creator (bool), approved_at
     const { error } = await supabase
       .from("beta_signups")
       .upsert(
@@ -115,12 +154,14 @@ export async function POST(req: Request) {
       );
 
     if (error) {
-      // If the table isn't created yet, this error will be very explicit.
       return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ ok: true }, { status: 200 });
+    return NextResponse.json({ ok: true });
   } catch (e: any) {
-    return NextResponse.json({ ok: false, error: e?.message || "Unknown error" }, { status: 500 });
+    return NextResponse.json(
+      { ok: false, error: e?.message || "Unknown error" },
+      { status: 500 }
+    );
   }
 }
