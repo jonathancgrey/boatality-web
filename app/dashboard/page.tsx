@@ -16,41 +16,35 @@ export default async function DashboardHome() {
     .eq("creator_id", user.id)
     .order("created_at", { ascending: true });
 
-  let totalAssets = 0;
-  let totalDrafts = 0;
-
-  const channelStats = await Promise.all(
-    (channels || []).map(async (ch) => {
-      const { count: assetCount } = await supabase
+  // Single query for all content rows across all channels — avoids N+1
+  const channelIds = (channels || []).map((ch) => ch.id);
+  const { data: allContent } = channelIds.length
+    ? await supabase
         .from("content_v2")
-        .select("*", { count: "exact", head: true })
-        .eq("channel_id", ch.id);
+        .select("channel_id, status, created_at")
+        .in("channel_id", channelIds)
+    : { data: [] };
 
-      const { count: draftCount } = await supabase
-        .from("content_v2")
-        .select("*", { count: "exact", head: true })
-        .eq("channel_id", ch.id)
-        .eq("status", "draft");
+  // Aggregate per-channel stats in JS
+  type Stats = { assetCount: number; draftCount: number; latestAt: string | null };
+  const statsMap: Record<string, Stats> = {};
+  for (const row of allContent || []) {
+    if (!statsMap[row.channel_id]) {
+      statsMap[row.channel_id] = { assetCount: 0, draftCount: 0, latestAt: null };
+    }
+    const s = statsMap[row.channel_id];
+    s.assetCount += 1;
+    if (row.status === "draft") s.draftCount += 1;
+    if (!s.latestAt || row.created_at > s.latestAt) s.latestAt = row.created_at;
+  }
 
-      const { data: latest } = await supabase
-        .from("content_v2")
-        .select("created_at")
-        .eq("channel_id", ch.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+  const channelStats = (channels || []).map((ch) => ({
+    ...ch,
+    ...(statsMap[ch.id] ?? { assetCount: 0, draftCount: 0, latestAt: null }),
+  }));
 
-      totalAssets += assetCount || 0;
-      totalDrafts += draftCount || 0;
-
-      return {
-        ...ch,
-        assetCount: assetCount || 0,
-        draftCount: draftCount || 0,
-        latestAt: latest?.created_at || null,
-      };
-    })
-  );
+  const totalAssets = channelStats.reduce((sum, ch) => sum + ch.assetCount, 0);
+  const totalDrafts = channelStats.reduce((sum, ch) => sum + ch.draftCount, 0);
 
   return (
     <div className="mx-auto max-w-7xl py-10 space-y-10">
@@ -118,7 +112,7 @@ export default async function DashboardHome() {
                 </td>
                 <td className="px-4 py-4 text-right">
                   <Link
-                    href={`/dashboard/channel/${ch.id}`}
+                    href="/dashboard/channels"
                     className="text-blue-400 hover:text-blue-300 text-xs font-semibold"
                   >
                     View →

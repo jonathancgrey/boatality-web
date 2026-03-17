@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Onboarding Preview — Boatality Studio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    * { font-family: 'Inter', system-ui, sans-serif; box-sizing: border-box; margin:0; padding:0; }
+    body { background: #020b16; min-height: 100vh; }
+
+    /* Noise overlay */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0;
+    }
+
+    .card { background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); border-radius:24px; backdrop-filter:blur(24px); box-shadow:0 32px 80px rgba(0,0,0,.6); }
+    .btn-primary { background:#2563eb; color:white; font-weight:600; padding:13px 20px; border-radius:12px; border:none; cursor:pointer; width:100%; display:flex; align-items:center; justify-content:center; gap:8px; font-size:13px; transition:background .15s; }
+    .btn-primary:hover { background:#3b82f6; }
+    .btn-ghost { background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.15); color:rgba(255,255,255,.6); font-weight:500; padding:13px 16px; border-radius:12px; border:none; cursor:pointer; display:flex; align-items:center; gap:6px; font-size:13px; transition:all .15s; flex-shrink:0; }
+    .btn-ghost:hover { background:rgba(255,255,255,.1); color:rgba(255,255,255,.85); }
+
+    .input-field { width:100%; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2); border-radius:12px; padding:12px 16px; color:white; font-size:14px; outline:none; }
+    .input-field::placeholder { color:rgba(255,255,255,.3); }
+
+    /* Step indicator dots */
+    .s-dot { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; }
+    .s-dot.done { background:#3b82f6; color:white; }
+    .s-dot.active { background:white; color:#020b16; box-shadow:0 0 0 4px rgba(255,255,255,.15); }
+    .s-dot.upcoming { background:rgba(255,255,255,.1); color:rgba(255,255,255,.3); }
+    .s-line { width:28px; height:1px; margin-bottom:14px; flex-shrink:0; }
+    .s-label { font-size:10px; font-weight:600; letter-spacing:.05em; margin-top:6px; }
+
+    /* Channel toggle cards */
+    .ch-card { display:flex; align-items:center; gap:14px; border-radius:12px; border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.05); padding:14px; cursor:pointer; transition:all .2s; width:100%; text-align:left; }
+    .ch-card.on { border-color:rgba(59,130,246,.5); background:rgba(59,130,246,.1); box-shadow:0 0 0 1px rgba(59,130,246,.25); }
+    .ch-icon { width:38px; height:38px; border-radius:10px; background:rgba(255,255,255,.1); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .ch-card.on .ch-icon { background:#2563eb; }
+    .ch-cb { width:20px; height:20px; border-radius:50%; border:2px solid rgba(255,255,255,.2); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .ch-card.on .ch-cb { border-color:#3b82f6; background:#3b82f6; }
+
+    /* Upload slots */
+    .upload-slot { border:2px dashed rgba(255,255,255,.2); border-radius:12px; background:rgba(255,255,255,.03); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .2s; position:relative; overflow:hidden; }
+    .upload-slot:hover { border-color:rgba(255,255,255,.4); background:rgba(255,255,255,.06); }
+    .upload-slot.has-img { border-style:solid; border-color:rgba(255,255,255,.15); }
+    .upload-slot .overlay { position:absolute; inset:0; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .2s; }
+    .upload-slot:hover .overlay { opacity:1; }
+
+    /* Feature rows */
+    .feat-row { display:flex; align-items:center; gap:14px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px 14px; }
+    .feat-icon { width:30px; height:30px; border-radius:8px; background:rgba(37,99,235,.2); border:1px solid rgba(59,130,246,.2); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+
+    /* Divider with label */
+    .divider { display:flex; align-items:center; gap:10px; }
+    .divider .line { flex:1; height:1px; background:rgba(255,255,255,.1); }
+    .divider span { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:rgba(255,255,255,.35); }
+
+    /* Tab nav */
+    .tab-nav { display:flex; gap:3px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:4px; }
+    .tab-btn { flex:1; padding:7px 8px; border:none; border-radius:8px; background:transparent; color:rgba(255,255,255,.4); font-size:11px; font-weight:600; cursor:pointer; transition:all .2s; white-space:nowrap; }
+    .tab-btn.active { background:rgba(255,255,255,.1); color:white; }
+
+    .screen { display:none; }
+    .screen.visible { display:block; }
+
+    @keyframes scaleIn { from{transform:scale(.6);opacity:0} to{transform:scale(1);opacity:1} }
+    .pop { animation: scaleIn .4s cubic-bezier(.34,1.56,.64,1) forwards; }
+
+    .pill { display:inline-flex; align-items:center; gap:5px; border-radius:9999px; border:1px solid rgba(59,130,246,.3); background:rgba(59,130,246,.1); padding:5px 11px; font-size:12px; font-weight:500; color:#93c5fd; }
+
+    /* Thumbnail mock for branding step */
+    .thumb-placeholder { background: linear-gradient(135deg, rgba(59,130,246,.15), rgba(99,102,241,.15)); display:flex; align-items:center; justify-content:center; }
+  </style>
+</head>
+<body>
+
+<!-- Sticky top nav -->
+<div style="position:sticky;top:0;z-index:50;backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.07);padding:12px 20px;background:rgba(2,11,22,.88);">
+  <div style="max-width:500px;margin:0 auto;">
+    <p style="color:rgba(255,255,255,.3);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">Onboarding flow preview</p>
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="show('welcome',this)">1 Welcome</button>
+      <button class="tab-btn" onclick="show('profile',this)">2 Profile</button>
+      <button class="tab-btn" onclick="show('channels',this)">3 Channels</button>
+      <button class="tab-btn" onclick="show('branding',this)">4 Branding</button>
+      <button class="tab-btn" onclick="show('done',this)">5 Done</button>
+      <button class="tab-btn" onclick="show('dashboard',this)" style="border-left:1px solid rgba(255,255,255,.12);margin-left:2px;padding-left:10px;">Dashboard</button>
+    </div>
+  </div>
+</div>
+
+<div style="padding:36px 16px 80px;position:relative;z-index:1;">
+<div style="max-width:500px;margin:0 auto;">
+
+
+<!-- ══════════════════════════════════════════════════════════
+     SCREEN 1 — WELCOME
+     ══════════════════════════════════════════════════════════ -->
+<div id="screen-welcome" class="screen visible">
+  <!-- Step indicator -->
+  <div style="display:flex;align-items:center;justify-content:center;margin-bottom:36px;">
+    <div style="display:flex;flex-direction:column;align-items:center;"><div class="s-dot active">1</div><span class="s-label" style="color:white;">Welcome</span></div>
+    <div class="s-line" style="background:rgba(255,255,255,.1);"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;"><div class="s-dot upcoming">2</div><span class="s-label" style="color:rgba(255,255,255,.25);">Profile</span></div>
+    <div class="s-line" style="background:rgba(255,255,255,.1);"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;"><div class="s-dot upcoming">3</div><span class="s-label" style="color:rgba(255,255,255,.25);">Channels</span></div>
+    <div class="s-line" style="background:rgba(255,255,255,.1);"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;"><div class="s-dot upcoming">4</div><span class="s-label" style="color:rgba(255,255,255,.25);">Branding</span></div>
+    <div class="s-line" style="background:rgba(255,255,255,.1);"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;"><div class="s-dot upcoming">5</div><span class="s-label" style="color:rgba(255,255,255,.25);">Done</span></div>
+  </div>
+
+  <div class="card" style="padding:32px;">
+    <div style="text-align:center;margin-bottom:28px;">
+      <div style="display:inline-flex;align-items:center;justify-content:center;width:54px;height:54px;border-radius:16px;background:rgba(37,99,235,.2);border:1px solid rgba(59,130,246,.3);margin-bottom:14px;"><span style="font-size:26px;">⚓</span></div>
+      <h1 style="color:white;font-size:21px;font-weight:800;margin-bottom:8px;letter-spacing:-.02em;">Welcome to Boatality Studio</h1>
+      <p style="color:rgba(255,255,255,.5);font-size:13px;line-height:1.65;max-width:300px;margin:0 auto;">Your creator hub for publishing videos, podcasts, and articles — all in one place. Setup takes under a minute.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:9px;margin-bottom:28px;">
+      <div class="feat-row"><div class="feat-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div><div><div style="font-size:13px;font-weight:600;color:white;">Videos</div><div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:2px;">Upload and manage long or short form video content</div></div></div>
+      <div class="feat-row"><div class="feat-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></div><div><div style="font-size:13px;font-weight:600;color:white;">Podcasts</div><div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:2px;">Publish audio episodes, interviews, and shows</div></div></div>
+      <div class="feat-row"><div class="feat-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><div><div style="font-size:13px;font-weight:600;color:white;">Articles</div><div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:2px;">Write and organize long-form posts and essays</div></div></div>
+    </div>
+    <button class="btn-primary" onclick="show('profile',document.querySelector('.tab-btn:nth-child(2)'))">Get started <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
+    <p style="text-align:center;font-size:11px;color:rgba(255,255,255,.25);margin-top:14px;">Already have an account? <span style="color:rgba(255,255,255,.45);text-decoration:underline;cursor:pointer;">Sign in</span></p>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     SCREEN 2 — PROFILE
+     ══════════════════════════════════════════════════════════ -->
+<div id="screen-profile" class="screen">
+  <div style="display:flex;align-items:center;justify-content:center;margin-bottom:36px;">
+    <div style="display:flex;flex-direction:column;align-items:center;"><div class="s-dot done">✓</div><span class="s-label" style="color:#60a5fa;">Welcome</span></div>
+    <div class="s-line" style="background:#3b82f6;"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;"><div class="s-dot active">2</div><span class="s-label" style="color:white;">Profile</span></div>
+    <div class="s-line" style="background:rgba(255,255,255,.1);"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;"><div class="s-dot upcoming">3</div><span class="s-label" style="color:rgba(255,255,255,.25);">Channels</span></div>
+    <div class="s-line" style="background:rgba(255,255,255,.1);"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;"><div class="s-dot upcoming">4</div><span class="s-label" style="color:rgba(255,255,255,.25);">Branding</span></div>
+    <div class="s-line" style="background:rgba(255,255,255,.1);"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;"><div class="s-dot upcoming">5</div><span class="s-label" style="color:rgba(255,255,255,.25);">Done</span></div>
+  </div>
+
+  <div class="card" style="padding:32px;">
+    <div style="margin-bottom:22px;"><h1 style="color:white;font-size:21px;font-weight:800;margin-bottom:4px;letter-spacing:-.02em;">Create your profile</h1><p style="color:rgba(255,255,255,.5);font-size:13px;">Tell your audience who you are.</p></div>
+    <div style="display:flex;flex-direction:column;gap:18px;margin-bottom:22px;">
+      <div>
+        <label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.6);margin-bottom:8px;">Display name <span style="color:#f87171;font-weight:400;text-transform:none;letter-spacing:0;">required</span></label>
+        <input class="input-field" type="text" value="Captain Grey" />
+        <p style="font-size:11px;color:rgba(255,255,255,.25);text-align:right;margin-top:4px;">13/60</p>
+      </div>
+      <div>
+        <label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.6);margin-bottom:8px;">Bio <span style="color:rgba(255,255,255,.3);font-weight:400;text-transform:none;letter-spacing:0;">optional</span></label>
+        <textarea class="input-field" rows="3" placeholder="A few words about you or your content…" style="resize:none;"></textarea>
+        <p style="font-size:11px;color:rgba(255,255,255,.25);text-align:right;margin-top:4px;">0/280</p>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="show('channels',document.querySelector('.tab-btn:nth-child(3)'))">Continue <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     SCREEN 3 — CHANNELS
+     ══════════════════════════════════════════════════════════ -->
+<div id="screen-channels" class="screen">
+  <div style="display:flex;align-items:center;justify-content:center;margin-bottom:36px;">
+    <div style="display:flex;flex-direction:column;align-items:center;"><div class="s-dot done">✓</div><span class="s-label" style="color:#60a5fa;">Welcome</span></div>
+    <div class="s-line" style="background:#3b82f6;"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;"><div class="s-dot done">✓</div><span class="s-label" style="color:#60a5fa;">Profile</span></div>
+    <div class="s-line" style="background:#3b82f6;"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;"><div class="s-dot active">3</div><span class="s-label" style="color:white;">Channels</span></div>
+    <div class="s-line" style="background:rgba(255,255,255,.1);"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;"><div class="s-dot upcoming">4</div><span class="s-label" style="color:rgba(255,255,255,.25);">Branding</span></div>
+    <div class="s-line" style="background:rgba(255,255,255,.1);"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;"><div class="s-dot upcoming">5</div><span class="s-label" style="color:rgba(255,255,255,.25);">Done</span></div>
+  </div>
+
+  <div class="card" style="padding:32px;">
+    <div style="margin-bottom:22px;"><h1 style="color:white;font-size:21px;font-weight:800;margin-bottom:4px;letter-spacing:-.02em;">Choose your channels</h1><p style="color:rgba(255,255,255,.5);font-size:13px;">Select the formats you'll publish to. You can add more later.</p></div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;" id="ch-list">
+      <button class="ch-card on" onclick="toggleCh(this)">
+        <div class="ch-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div>
+        <div style="flex:1;"><div style="font-size:13px;font-weight:600;color:white;">Videos</div><div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:2px;">Long or short form video content</div></div>
+        <div class="ch-cb"><svg width="9" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </button>
+      <button class="ch-card" onclick="toggleCh(this)">
+        <div class="ch-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></div>
+        <div style="flex:1;"><div style="font-size:13px;font-weight:600;color:rgba(255,255,255,.7);">Podcast</div><div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:2px;">Audio episodes, interviews, and shows</div></div>
+        <div class="ch-cb"></div>
+      </button>
+      <button class="ch-card" onclick="toggleCh(this)">
+        <div class="ch-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+        <div style="flex:1;"><div style="font-size:13px;font-weight:600;color:rgba(255,255,255,.7);">Articles</div><div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:2px;">Written posts, essays, and long-form content</div></div>
+        <div class="ch-cb"></div>
+      </button>
+    </div>
+    <p id="ch-hint" style="text-align:center;font-size:11px;color:rgba(255,255,255,.3);margin-bottom:22px;">1 channel selected · <span style="color:rgba(255,255,255,.4);">select more to publish across formats</span></p>
+    <button class="btn-primary" onclick="show('branding',document.querySelector('.tab-btn:nth-child(4)'))">Continue <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     SCREEN 4 — BRANDING
+     ══════════════════════════════════════════════════════════ -->
+<div id="screen-branding" class="screen">
+  <div style="display:flex;align-items:center;justify-content:center;margin-bottom:36px;">
+    <div style="display:flex;flex-direction:column;align-items:center;"><div class="s-dot done">✓</div><span class="s-label" style="color:#60a5fa;">Welcome</span></div>
+    <div class="s-line" style="background:#3b82f6;"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;"><div class="s-dot done">✓</div><span class="s-label" style="color:#60a5fa;">Profile</span></div>
+    <div class="s-line" style="background:#3b82f6;"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;"><div class="s-dot done">✓</div><span class="s-label" style="color:#60a5fa;">Channels</span></div>
+    <div class="s-line" style="background:#3b82f6;"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;"><div class="s-dot active">4</div><span class="s-label" style="color:white;">Branding</span></div>
+    <div class="s-line" style="background:rgba(255,255,255,.1);"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;"><div class="s-dot upcoming">5</div><span class="s-label" style="color:rgba(255,255,255,.25);">Done</span></div>
+  </div>
+
+  <div class="card" style="padding:32px;">
+    <div style="margin-bottom:24px;"><h1 style="color:white;font-size:21px;font-weight:800;margin-bottom:4px;letter-spacing:-.02em;">Add your branding</h1><p style="color:rgba(255,255,255,.5);font-size:13px;">Upload avatars, icons, and banners. You can skip any of these and update them later.</p></div>
+
+    <!-- Creator Profile section -->
+    <div style="margin-bottom:24px;">
+      <div class="divider" style="margin-bottom:18px;"><div class="line"></div><span>Creator profile</span><div class="line"></div></div>
+
+      <!-- Cover image (wide) -->
+      <div style="margin-bottom:16px;">
+        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.5);margin-bottom:8px;">Cover image <span style="font-weight:400;text-transform:none;letter-spacing:0;color:rgba(255,255,255,.25);">recommended 1500 × 500px</span></p>
+        <div class="upload-slot has-img" style="width:100%;aspect-ratio:3/1;border-style:solid;">
+          <!-- Simulated uploaded cover with gradient -->
+          <div style="position:absolute;inset:0;background:linear-gradient(135deg,#1e3a5f,#0f2340,#1a2d4a);"></div>
+          <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.4));"></div>
+          <div style="position:absolute;bottom:8px;right:8px;width:18px;height:18px;border-radius:50%;background:#22c55e;display:flex;align-items:center;justify-content:center;">
+            <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="overlay"><span style="font-size:12px;font-weight:600;color:white;">Replace</span></div>
+        </div>
+      </div>
+
+      <!-- Avatar (square) -->
+      <div style="display:flex;align-items:flex-end;gap:14px;">
+        <div style="flex-shrink:0;">
+          <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.5);margin-bottom:8px;">Avatar <span style="font-weight:400;text-transform:none;letter-spacing:0;color:rgba(255,255,255,.25);">400 × 400px</span></p>
+          <div class="upload-slot has-img" style="width:88px;height:88px;border-style:solid;">
+            <div style="position:absolute;inset:0;background:linear-gradient(135deg,#2563eb,#1d4ed8);display:flex;align-items:center;justify-content:center;">
+              <span style="font-size:28px;">⚓</span>
+            </div>
+            <div style="position:absolute;bottom:4px;right:4px;width:16px;height:16px;border-radius:50%;background:#22c55e;display:flex;align-items:center;justify-content:center;">
+              <svg width="8" height="7" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="overlay"><span style="font-size:11px;font-weight:600;color:white;">Replace</span></div>
+          </div>
+        </div>
+        <p style="font-size:11px;color:rgba(255,255,255,.3);padding-bottom:4px;line-height:1.6;">Your avatar appears next to your name across Boatality. JPG, PNG, or WebP — max 5 MB.</p>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div style="display:flex;gap:10px;padding-top:4px;">
+      <button class="btn-ghost" onclick="show('done',document.querySelector('.tab-btn:nth-child(5)'))">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+        Skip for now
+      </button>
+      <button class="btn-primary" onclick="show('done',document.querySelector('.tab-btn:nth-child(5)'))">Continue <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     SCREEN 5 — DONE
+     ══════════════════════════════════════════════════════════ -->
+<div id="screen-done" class="screen">
+  <div style="display:flex;align-items:center;justify-content:center;margin-bottom:36px;">
+    <div style="display:flex;flex-direction:column;align-items:center;"><div class="s-dot done">✓</div><span class="s-label" style="color:#60a5fa;">Welcome</span></div>
+    <div class="s-line" style="background:#3b82f6;"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;"><div class="s-dot done">✓</div><span class="s-label" style="color:#60a5fa;">Profile</span></div>
+    <div class="s-line" style="background:#3b82f6;"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;"><div class="s-dot done">✓</div><span class="s-label" style="color:#60a5fa;">Channels</span></div>
+    <div class="s-line" style="background:#3b82f6;"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;"><div class="s-dot done">✓</div><span class="s-label" style="color:#60a5fa;">Branding</span></div>
+    <div class="s-line" style="background:#3b82f6;"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;"><div class="s-dot active">5</div><span class="s-label" style="color:white;">Done</span></div>
+  </div>
+
+  <div class="card" style="padding:32px;text-align:center;">
+    <div style="display:flex;justify-content:center;margin-bottom:28px;">
+      <div class="pop" style="position:relative;">
+        <div style="width:76px;height:76px;border-radius:50%;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);display:flex;align-items:center;justify-content:center;">
+          <svg width="34" height="34" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="16" stroke="#4ade80" stroke-width="1.5" stroke-opacity=".4"/><path d="M10 18.5L15.5 24L26 13" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div style="position:absolute;inset:0;border-radius:50%;background:rgba(34,197,94,.08);filter:blur(16px);z-index:-1;"></div>
+      </div>
+    </div>
+    <h1 style="color:white;font-size:21px;font-weight:800;margin-bottom:8px;letter-spacing:-.02em;">You're all set, Captain Grey!</h1>
+    <p style="color:rgba(255,255,255,.5);font-size:13px;margin-bottom:24px;">Your Boatality Studio is live and ready to publish.</p>
+
+    <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:16px;text-align:left;margin-bottom:14px;">
+      <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.5);margin-bottom:12px;">Your channels</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        <span class="pill"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg> Videos</span>
+      </div>
+    </div>
+
+    <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:16px;text-align:left;margin-bottom:24px;">
+      <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.5);margin-bottom:12px;">What's next</p>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;">
+        <li style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:rgba(255,255,255,.6);"><span style="color:#60a5fa;margin-top:1px;flex-shrink:0;">→</span> Upload your first piece of content</li>
+        <li style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:rgba(255,255,255,.6);"><span style="color:#60a5fa;margin-top:1px;flex-shrink:0;">→</span> Customize your channel names and descriptions</li>
+        <li style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:rgba(255,255,255,.6);"><span style="color:#60a5fa;margin-top:1px;flex-shrink:0;">→</span> Add more channels as your content grows</li>
+      </ul>
+    </div>
+
+    <button class="btn-primary" onclick="show('dashboard',document.querySelector('.tab-btn:nth-child(6)'))">Go to your dashboard <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     SCREEN 6 — DASHBOARD
+     ══════════════════════════════════════════════════════════ -->
+<div id="screen-dashboard" class="screen">
+  <!-- Top bar -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;">
+    <div>
+      <p style="color:rgba(255,255,255,.4);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;">Boatality Studio</p>
+      <h1 style="color:white;font-size:22px;font-weight:800;letter-spacing:-.02em;">Good morning, Captain Grey 👋</h1>
+    </div>
+    <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#2563eb,#1d4ed8);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="font-size:18px;">⚓</span></div>
+  </div>
+
+  <!-- Stats row -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;">
+    <div class="card" style="padding:16px 14px;">
+      <p style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.45);margin-bottom:6px;">Channels</p>
+      <p style="font-size:28px;font-weight:700;color:white;">1</p>
+    </div>
+    <div class="card" style="padding:16px 14px;">
+      <p style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.45);margin-bottom:6px;">Total assets</p>
+      <p style="font-size:28px;font-weight:700;color:white;">0</p>
+    </div>
+    <div class="card" style="padding:16px 14px;">
+      <p style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.45);margin-bottom:6px;">Drafts</p>
+      <p style="font-size:28px;font-weight:700;color:white;">0</p>
+    </div>
+  </div>
+
+  <!-- Action buttons -->
+  <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+    <button class="btn-ghost" style="flex:1;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      Create channel
+    </button>
+    <button class="btn-primary" style="flex:2;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+      Upload content
+    </button>
+  </div>
+
+  <!-- Channels table -->
+  <div class="card" style="overflow:hidden;">
+    <div style="padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.08);">
+      <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.4);">Your channels</p>
+    </div>
+    <!-- Header row -->
+    <div style="display:grid;grid-template-columns:2fr 1fr 60px 60px 1fr 40px;gap:8px;padding:10px 18px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.06);">
+      <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.35);">Channel</p>
+      <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.35);">Type</p>
+      <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.35);">Assets</p>
+      <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.35);">Drafts</p>
+      <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.35);">Last upload</p>
+      <p></p>
+    </div>
+    <!-- Data row -->
+    <div style="display:grid;grid-template-columns:2fr 1fr 60px 60px 1fr 40px;gap:8px;align-items:center;padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.05);">
+      <p style="font-size:13px;font-weight:600;color:white;">Videos</p>
+      <p style="font-size:13px;color:rgba(255,255,255,.6);text-transform:capitalize;">video</p>
+      <p style="font-size:13px;color:rgba(255,255,255,.6);">0</p>
+      <p style="font-size:13px;color:rgba(255,255,255,.6);">0</p>
+      <p style="font-size:11px;color:rgba(255,255,255,.35);">—</p>
+      <p style="font-size:11px;font-weight:600;color:#60a5fa;cursor:pointer;">View →</p>
+    </div>
+    <!-- Empty state hint -->
+    <div style="padding:20px 18px;text-align:center;">
+      <p style="font-size:12px;color:rgba(255,255,255,.3);">Upload your first piece of content to get started.</p>
+    </div>
+  </div>
+</div>
+
+
+</div><!-- /max-width -->
+</div><!-- /padding -->
+
+<script>
+  function show(name, tabEl) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('visible'));
+    document.getElementById('screen-' + name).classList.add('visible');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    if (tabEl) tabEl.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  let chCount = 1;
+  function toggleCh(card) {
+    const was = card.classList.contains('on');
+    if (was && chCount === 1) return;
+    if (was) {
+      card.classList.remove('on');
+      card.querySelector('.ch-icon svg').style.stroke = 'rgba(255,255,255,.5)';
+      card.querySelector('.ch-cb').innerHTML = '';
+      chCount--;
+    } else {
+      card.classList.add('on');
+      card.querySelector('.ch-icon svg').style.stroke = 'white';
+      card.querySelector('.ch-cb').innerHTML = '<svg width="9" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      chCount++;
+    }
+    const hint = document.getElementById('ch-hint');
+    hint.innerHTML = chCount + ' channel' + (chCount !== 1 ? 's' : '') + ' selected'
+      + (chCount === 1 ? ' · <span style="color:rgba(255,255,255,.4);">select more to publish across formats</span>' : '');
+  }
+</script>
+</body>
+</html>
