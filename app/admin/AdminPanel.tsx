@@ -54,13 +54,20 @@ export default function AdminPanel({ initial }: { initial: Signup[] }) {
   }
 
   async function invite(s: Signup) {
-    const ok = await callApi(
-      "/api/admin/invite",
-      { email: s.email, signupId: s.id },
-      { status: "invited", invited_at: new Date().toISOString() },
-      s.id,
-    );
-    if (ok) showToast(`Invite sent to ${s.email}`, true);
+    setActionId(s.id);
+    const res  = await fetch("/api/admin/invite", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: s.email, signupId: s.id }),
+    });
+    const json = await res.json();
+    setActionId(null);
+    if (json.ok) {
+      setSignups((prev) => prev.map((x) => x.id === s.id ? { ...x, status: "invited", invited_at: new Date().toISOString() } : x));
+      showToast(json.note ?? `Invite sent to ${s.email}`, true);
+    } else {
+      showToast(json.error ?? "Something went wrong", false);
+    }
   }
 
   async function reject(s: Signup) {

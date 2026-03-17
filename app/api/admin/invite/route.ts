@@ -35,23 +35,45 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "Missing email or signupId" }, { status: 400 });
   }
 
-  // 3. Service-role client (admin operations only, never sent to browser)
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
+
+  // 3. Service-role client
   const adminClient = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     { auth: { persistSession: false } }
   );
 
-  // 4. Send Supabase invite — creates their auth account + sends invite email
+  // 4. Try invite first (works for new users — sends branded email via Resend SMTP)
   const { error: inviteErr } = await adminClient.auth.admin.inviteUserByEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/auth/callback`,
+    redirectTo: `${siteUrl}/auth/callback`,
   });
 
-  if (inviteErr) {
-    // "User already registered" is fine — they may have been re-invited
-    if (!inviteErr.message.toLowerCase().includes("already")) {
-      return NextResponse.json({ ok: false, error: inviteErr.message }, { status: 500 });
+  const alreadyExists =
+    inviteErr &&
+    (inviteErr.message.toLowerCase().includes("already") ||
+      (inviteErr as any).status === 422);
+
+  if (inviteErr && !alreadyExists) {
+    // A real error — surface it
+    return NextResponse.json({ ok: false, error: inviteErr.message }, { status: 500 });
+  }
+
+  if (alreadyExists) {
+    // User already has an account — generate a magic link and send it via SMTP
+    const { error: linkErr } = await adminClient.auth.admin.generateLink({
+      type: "magiclink",
+      email,
+      options: { redirectTo: `${siteUrl}/auth/callback` },
+    });
+
+    if (linkErr) {
+      return NextResponse.json(
+        { ok: false, error: `User already exists and magic link failed: ${linkErr.message}` },
+        { status: 500 }
+      );
     }
+    // generateLink with SMTP configured will send the email automatically
   }
 
   // 5. Mark as invited in beta_signups
@@ -64,5 +86,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: updateErr.message }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({
+    ok: true,
+    note: alreadyExists ? "User already had an account — sent magic link instead" : "Invite sent",
+  });
 }
