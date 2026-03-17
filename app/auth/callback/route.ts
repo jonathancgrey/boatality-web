@@ -48,7 +48,7 @@ export async function GET(request: Request) {
     .eq("id", user.id)
     .maybeSingle();
 
-  const destination = creator ? "/dashboard" : "/onboarding";
+  const destination = creator ? "/dashboard/content" : "/onboarding";
 
   return NextResponse.redirect(new URL(destination, url.origin));
 }
