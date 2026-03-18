@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabaseClient";
-import { Anchor, Eye, EyeOff } from "lucide-react";
+import { Anchor, Eye, EyeOff, KeyRound } from "lucide-react";
 
 export default function LoginPage() {
   const supabase = createClient();
@@ -14,6 +14,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showSetupHint, setShowSetupHint] = useState(false);
 
   async function handleSignIn(e: React.FormEvent) {
     e.preventDefault();
@@ -23,11 +24,12 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
-      setError(
-        error.message === "Invalid login credentials"
-          ? "Incorrect email or password."
-          : error.message
-      );
+      if (error.message === "Invalid login credentials") {
+        setError("Incorrect email or password.");
+        setShowSetupHint(true); // surface the setup prompt on bad credentials
+      } else {
+        setError(error.message);
+      }
       setLoading(false);
       return;
     }
@@ -80,6 +82,7 @@ export default function LoginPage() {
                 Forgot password?
               </a>
             </div>
+
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
@@ -116,7 +119,42 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="text-center text-xs text-white/25 mt-6">
+        {/* First-time / no-password callout — always visible, elevated on failed login */}
+        <div className={`mt-5 rounded-xl border px-4 py-3.5 transition-all ${
+          showSetupHint
+            ? "bg-[#C84121]/10 border-[#C84121]/30"
+            : "bg-white/[0.03] border-white/10"
+        }`}>
+          <div className="flex items-start gap-3">
+            <div className={`mt-0.5 flex-shrink-0 rounded-lg p-1.5 ${
+              showSetupHint ? "bg-[#C84121]/20" : "bg-white/5"
+            }`}>
+              <KeyRound className={`h-3.5 w-3.5 ${showSetupHint ? "text-[#C84121]" : "text-white/40"}`} />
+            </div>
+            <div className="min-w-0">
+              <p className={`text-xs font-semibold ${showSetupHint ? "text-white/90" : "text-white/55"}`}>
+                {showSetupHint ? "Haven't set a password yet?" : "Just got approved?"}
+              </p>
+              <p className={`text-xs mt-0.5 leading-relaxed ${showSetupHint ? "text-white/60" : "text-white/35"}`}>
+                {showSetupHint
+                  ? "If you signed in via the approval email, you don't have a password yet."
+                  : "If you received an approval email, you'll need to set a password before signing in here."}
+              </p>
+              <a
+                href="/forgot-password"
+                className={`inline-block mt-2 text-xs font-semibold underline underline-offset-2 transition-colors ${
+                  showSetupHint
+                    ? "text-[#f4845f] hover:text-[#C84121]"
+                    : "text-white/40 hover:text-white/70"
+                }`}
+              >
+                Set up your password →
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-center text-xs text-white/25 mt-5">
           Don&apos;t have an account?{" "}
           <a
             href="https://form.boatality.com/?role=creator&source=creator-login"
