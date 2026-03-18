@@ -31,14 +31,14 @@ export default async function OnboardingWelcome() {
   // Layout already handles unauthenticated users, but be explicit
   if (!user) redirect("/login");
 
-  // Already onboarded — send straight to the dashboard
+  // Already completed onboarding — send straight to the dashboard
   const { data: creator } = await supabase
     .from("creators_v2")
-    .select("id")
+    .select("onboarding_completed")
     .eq("id", user.id)
     .maybeSingle();
 
-  if (creator) redirect("/dashboard");
+  if (creator?.onboarding_completed) redirect("/dashboard");
 
   return (
     <div className="space-y-8">

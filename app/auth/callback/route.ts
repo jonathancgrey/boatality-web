@@ -50,12 +50,13 @@ export async function GET(request: Request) {
 
   const { data: creator } = await supabase
     .from("creators_v2")
-    .select("id")
+    .select("onboarding_completed")
     .eq("id", user.id)
     .maybeSingle();
 
-  // New users (no creator row yet) need to set a password before onboarding
-  const destination = creator ? "/dashboard/content" : "/set-password";
+  // Only send to dashboard if they've actually finished onboarding.
+  // Trigger-created skeleton rows have onboarding_completed = false.
+  const destination = creator?.onboarding_completed ? "/dashboard/content" : "/set-password";
 
   return NextResponse.redirect(new URL(destination, url.origin));
 }

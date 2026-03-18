@@ -49,6 +49,13 @@ export default function OnboardingFinish() {
           .order("created_at", { ascending: true }),
       ]);
 
+      // Mark onboarding as complete so the auth callback sends returning
+      // users to the dashboard instead of back through set-password.
+      await supabase
+        .from("creators_v2")
+        .update({ onboarding_completed: true })
+        .eq("id", user.id);
+
       setName(creator?.display_name ?? null);
       setChannels((channelData as Channel[]) ?? []);
       setLoaded(true);
