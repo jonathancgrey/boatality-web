@@ -54,7 +54,7 @@ const NAV: NavGroup[] = [
   {
     section: "Channel",
     items: [
-      { label: "Branding", href: "#", icon: Palette, soon: true },
+      { label: "Branding", href: "/dashboard/branding", icon: Palette },
       { label: "Settings", href: "#", icon: Settings, soon: true },
     ],
   },
