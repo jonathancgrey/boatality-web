@@ -157,8 +157,8 @@ export default function UploadPage() {
       formData.set("channelId", channel.id);
 
       if (contentType === "article") {
-        // Articles: no B2 upload — body is stored in description
-        formData.set("description", articleBody);
+        // Articles: no B2 upload — full text stored in body column
+        formData.set("body", articleBody);
         // mediaUrl left absent; actions.ts allows null for articles
       } else {
         const file = formData.get("file") as File | null;

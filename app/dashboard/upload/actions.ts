@@ -22,7 +22,8 @@ export async function uploadContent(formData: FormData) {
 
   const channelId = formData.get("channelId")?.toString();
   const title = formData.get("title")?.toString();
-  const description = formData.get("description")?.toString();
+  const description = formData.get("description")?.toString() || null;
+  const body = formData.get("body")?.toString() || null; // full article text
   const primaryCategory = formData.get("primaryCategory")?.toString();
   const contentType = formData.get("contentType")?.toString(); // content_v2.type
 
@@ -148,6 +149,7 @@ export async function uploadContent(formData: FormData) {
     type: contentType,
     title,
     description,
+    body: body ?? null,
     media_url: mediaUrl ?? null,
     // Optional: keep key for debugging/migrations later (only if your table has the column)
     // media_key: mediaKey,
