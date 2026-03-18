@@ -160,9 +160,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
     }
 
-    // Send branded confirmation email
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
+    // Send branded confirmation email to the signup
     try {
-      const resend = new Resend(process.env.RESEND_API_KEY);
       const templatePath = path.join(
         process.cwd(),
         "supabase/email-templates/waitlist-sequence/01-confirmation.html"
@@ -177,6 +178,37 @@ export async function POST(req: Request) {
       });
     } catch {
       // Don't fail the signup if the email errors — the row is already saved
+    }
+
+    // Ping Jonathan so he can review and approve quickly
+    try {
+      const roleLabel = role === "creator" ? "🎬 Creator" : role === "both" ? "🎬👀 Creator + Viewer" : "👀 Viewer";
+      const creatorLinksHtml = creator_links?.length
+        ? `<p style="margin:8px 0 0;"><strong>Links:</strong> ${creator_links.map((l: any) => `<a href="${l.url}">${l.url}</a>`).join(", ")}</p>`
+        : "";
+
+      await resend.emails.send({
+        from: "Boatality Signups <jonathan@boatality.com>",
+        to: "jonathan.c.greviskis@gmail.com",
+        subject: `New waitlist signup — ${name ?? email}`,
+        html: `
+          <div style="font-family:system-ui,sans-serif;max-width:480px;padding:24px;background:#0d1f2d;color:#fff;border-radius:12px;">
+            <p style="margin:0 0 4px;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.4);">New signup</p>
+            <h2 style="margin:0 0 20px;font-size:20px;font-weight:700;">${name ?? "(no name)"}</h2>
+            <p style="margin:0 0 8px;font-size:14px;color:rgba(255,255,255,.75);"><strong>Email:</strong> ${email}</p>
+            <p style="margin:0 0 8px;font-size:14px;color:rgba(255,255,255,.75);"><strong>Role:</strong> ${roleLabel}</p>
+            ${source ? `<p style="margin:0 0 8px;font-size:14px;color:rgba(255,255,255,.75);"><strong>Source:</strong> ${source}</p>` : ""}
+            ${creatorLinksHtml}
+            <div style="margin-top:24px;">
+              <a href="https://studio.boatality.com/admin" style="display:inline-block;background:#C84121;color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 24px;border-radius:8px;">
+                Review in admin →
+              </a>
+            </div>
+          </div>
+        `,
+      });
+    } catch {
+      // Notification failure is silent — never block the signup
     }
 
     return NextResponse.json({ ok: true });
