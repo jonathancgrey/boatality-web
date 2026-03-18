@@ -34,6 +34,12 @@ export async function GET(request: Request) {
     }
   }
 
+  // If a ?next= param was passed (e.g. from a password reset link), honour it
+  const next = url.searchParams.get("next");
+  if (next && next.startsWith("/")) {
+    return NextResponse.redirect(new URL(next, url.origin));
+  }
+
   const {
     data: { user },
   } = await supabase.auth.getUser();

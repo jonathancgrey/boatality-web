@@ -69,9 +69,17 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-medium text-white/50 uppercase tracking-wider">
-              Password
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-medium text-white/50 uppercase tracking-wider">
+                Password
+              </label>
+              <a
+                href="/forgot-password"
+                className="text-xs text-white/35 hover:text-white/60 transition-colors"
+              >
+                Forgot password?
+              </a>
+            </div>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
@@ -111,7 +119,7 @@ export default function LoginPage() {
         <p className="text-center text-xs text-white/25 mt-6">
           Don&apos;t have an account?{" "}
           <a
-            href="https://boatality.com"
+            href="https://form.boatality.com/?role=creator&source=creator-login"
             className="text-white/40 hover:text-white/60 underline underline-offset-2 transition-colors"
           >
             Apply for beta access
