@@ -35,13 +35,28 @@ type Creator = {
   banner_url: string | null;
 };
 
+type ChannelType = "video" | "podcast" | "article";
+
 type Channel = {
   id: string;
   name: string;
-  type: "video" | "podcast" | "article";
+  type: ChannelType;
+  enabled: boolean;
   avatar_url: string | null;
   banner_url: string | null;
 };
+
+const ALL_CHANNEL_TYPES: {
+  type: ChannelType;
+  label: string;
+  desc: string;
+  icon: React.ReactNode;
+  defaultName: string;
+}[] = [
+  { type: "video",   label: "Videos",   desc: "Long & short-form video",         icon: <Video size={18} />,    defaultName: "Videos"   },
+  { type: "podcast", label: "Podcast",  desc: "Audio episodes & interviews",      icon: <Mic size={18} />,      defaultName: "Podcast"  },
+  { type: "article", label: "Articles", desc: "Written posts & long-form content", icon: <FileText size={18} />, defaultName: "Articles" },
+];
 
 type SlotKey =
   | "creator-avatar"
@@ -56,8 +71,8 @@ type SlotData = {
 };
 
 const CHANNEL_ICONS: Record<string, React.ReactNode> = {
-  video: <Video size={14} className="text-white/50" />,
-  podcast: <Mic size={14} className="text-white/50" />,
+  video:   <Video    size={14} className="text-white/50" />,
+  podcast: <Mic      size={14} className="text-white/50" />,
   article: <FileText size={14} className="text-white/50" />,
 };
 
@@ -211,7 +226,7 @@ export default function BrandingPage() {
           .maybeSingle(),
         supabase
           .from("channels_v2")
-          .select("id, name, type, avatar_url, banner_url")
+          .select("id, name, type, enabled, avatar_url, banner_url")
           .eq("creator_id", user.id)
           .order("created_at", { ascending: true }),
       ]);
@@ -228,7 +243,14 @@ export default function BrandingPage() {
         banner_url: creatorData?.banner_url ?? null,
       };
 
-      const ch = (channelData as Channel[]) ?? [];
+      const ch: Channel[] = (channelData ?? []).map((r: any) => ({
+        id:         r.id,
+        name:       r.name,
+        type:       r.type,
+        enabled:    r.enabled ?? true,
+        avatar_url: r.avatar_url ?? null,
+        banner_url: r.banner_url ?? null,
+      }));
       setCreator(c);
       setChannels(ch);
       setChannelNames(Object.fromEntries(ch.map((x) => [x.id, x.name])));
@@ -334,6 +356,64 @@ export default function BrandingPage() {
       [slotKey]: { previewUrl: null, uploadState: "idle", errorMessage: null },
     }));
   }, []);
+
+  // ── Toggle channel on/off ─────────────────────────────────────────────────
+  const [toggling, setToggling] = useState<ChannelType | null>(null);
+
+  async function toggleChannel(type: ChannelType) {
+    if (!userId || toggling) return;
+    setToggling(type);
+
+    try {
+      const existing = channels.find((ch) => ch.type === type);
+
+      if (!existing) {
+        // Channel doesn't exist yet — create it enabled
+        const opt = ALL_CHANNEL_TYPES.find((o) => o.type === type)!;
+        const { data, error } = await supabase
+          .from("channels_v2")
+          .insert({ creator_id: userId, name: opt.defaultName, type, enabled: true })
+          .select("id, name, type, enabled, avatar_url, banner_url")
+          .single();
+
+        if (error) throw new Error(error.message);
+
+        const newCh: Channel = {
+          id:         data.id,
+          name:       data.name,
+          type:       data.type,
+          enabled:    true,
+          avatar_url: null,
+          banner_url: null,
+        };
+        setChannels((prev) => [...prev, newCh]);
+        setChannelNames((prev) => ({ ...prev, [data.id]: data.name }));
+        setSlots((prev) => ({
+          ...prev,
+          [`ch-${data.id}-icon`]:   { previewUrl: null, uploadState: "idle", errorMessage: null },
+          [`ch-${data.id}-banner`]: { previewUrl: null, uploadState: "idle", errorMessage: null },
+        }));
+      } else {
+        // Toggle the enabled flag
+        const newEnabled = !existing.enabled;
+        const { error } = await supabase
+          .from("channels_v2")
+          .update({ enabled: newEnabled })
+          .eq("id", existing.id)
+          .eq("creator_id", userId);
+
+        if (error) throw new Error(error.message);
+
+        setChannels((prev) =>
+          prev.map((ch) => ch.id === existing.id ? { ...ch, enabled: newEnabled } : ch)
+        );
+      }
+    } catch (err: any) {
+      setSaveError(err?.message ?? "Failed to update channel.");
+    } finally {
+      setToggling(null);
+    }
+  }
 
   // ── Save text fields ──────────────────────────────────────────────────────
   async function handleSave() {
@@ -601,11 +681,63 @@ export default function BrandingPage() {
       </section>
 
       {/* ── Section: Channels ──────────────────────────────────────────── */}
-      {channels.length > 0 && (
-        <section className="space-y-5">
-          <SectionDivider label="Your channels" />
+      <section className="space-y-5">
+        <SectionDivider label="Your channels" />
 
-          {channels.map((ch) => {
+        {/* Channel type toggle cards */}
+        <div className="grid grid-cols-3 gap-3">
+          {ALL_CHANNEL_TYPES.map((opt) => {
+            const existing = channels.find((ch) => ch.type === opt.type);
+            const isEnabled = existing?.enabled ?? false;
+            const isLoading = toggling === opt.type;
+
+            return (
+              <button
+                key={opt.type}
+                type="button"
+                onClick={() => toggleChannel(opt.type)}
+                disabled={!!toggling}
+                className={[
+                  "relative flex flex-col items-center gap-2 rounded-xl border px-3 py-4 text-center transition-all duration-200 disabled:cursor-not-allowed",
+                  isEnabled
+                    ? "border-[#C84121]/50 bg-[#C84121]/10 ring-1 ring-[#C84121]/20"
+                    : "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.06]",
+                ].join(" ")}
+              >
+                {/* Icon */}
+                <div className={[
+                  "w-9 h-9 rounded-lg flex items-center justify-center transition-colors",
+                  isEnabled ? "bg-[#C84121] text-white" : "bg-white/10 text-white/40",
+                ].join(" ")}>
+                  {isLoading
+                    ? <Loader2 size={16} className="animate-spin" />
+                    : opt.icon}
+                </div>
+
+                {/* Label */}
+                <span className={[
+                  "text-xs font-semibold transition-colors",
+                  isEnabled ? "text-white" : "text-white/40",
+                ].join(" ")}>
+                  {opt.label}
+                </span>
+
+                {/* Status pill */}
+                <span className={[
+                  "text-[9px] font-semibold uppercase tracking-widest px-1.5 py-0.5 rounded-full",
+                  isEnabled
+                    ? "bg-[#C84121]/20 text-[#f4845f]"
+                    : "bg-white/5 text-white/25",
+                ].join(" ")}>
+                  {isEnabled ? "On" : "Off"}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Per-channel branding — only shown for enabled channels */}
+        {channels.filter((ch) => ch.enabled).map((ch) => {
             const iconSlot = slots[`ch-${ch.id}-icon` as SlotKey];
             const bannerSlot = slots[`ch-${ch.id}-banner` as SlotKey];
             if (!iconSlot || !bannerSlot) return null;
@@ -677,8 +809,7 @@ export default function BrandingPage() {
               </div>
             );
           })}
-        </section>
-      )}
+      </section>
 
       {/* Bottom save button */}
       <div className="pt-2 pb-8">
