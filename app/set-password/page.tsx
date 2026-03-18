@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabaseClient";
 import { Anchor, Eye, EyeOff, CheckCircle2 } from "lucide-react";
@@ -14,6 +14,18 @@ export default function SetPasswordPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [checking, setChecking] = useState(true);
+
+  // Guard: redirect to login if there's no active session
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        router.replace("/login");
+      } else {
+        setChecking(false);
+      }
+    });
+  }, []);
 
   const strong = password.length >= 8;
   const matches = password === confirm && confirm.length > 0;
@@ -43,6 +55,14 @@ export default function SetPasswordPage() {
 
     // Password set — continue to onboarding
     router.push("/onboarding");
+  }
+
+  if (checking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#020b16]">
+        <div className="w-6 h-6 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
+      </div>
+    );
   }
 
   return (
