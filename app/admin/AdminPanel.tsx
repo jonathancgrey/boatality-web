@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle, XCircle, Clock, RefreshCw, ExternalLink } from "lucide-react";
+import { CheckCircle, XCircle, Clock, RefreshCw, ExternalLink, Send } from "lucide-react";
 
 export type Signup = {
   id: string;
@@ -78,6 +78,22 @@ export default function AdminPanel({ initial }: { initial: Signup[] }) {
       s.id,
     );
     if (ok) showToast(`${s.email} rejected`, true);
+  }
+
+  async function resendInvite(s: Signup) {
+    setActionId(s.id + "-resend");
+    const res  = await fetch("/api/admin/invite", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: s.email, signupId: s.id }),
+    });
+    const json = await res.json();
+    setActionId(null);
+    if (json.ok) {
+      showToast(`Invite resent to ${s.email}`, true);
+    } else {
+      showToast(json.error ?? "Something went wrong", false);
+    }
   }
 
   const filtered = signups.filter((s) => filter === "all" || s.status === filter);
@@ -199,6 +215,15 @@ export default function AdminPanel({ initial }: { initial: Signup[] }) {
                                 ? <div className="h-3 w-3 rounded-full border-2 border-green-300/30 border-t-green-300 animate-spin" />
                                 : <CheckCircle className="h-3 w-3" />}
                               {s.status === "rejected" ? "Re-invite" : "Approve"}
+                            </button>
+                          )}
+                          {s.status === "invited" && (
+                            <button onClick={() => resendInvite(s)} disabled={actionId === s.id + "-resend"}
+                              className="inline-flex items-center gap-1.5 rounded-full bg-sky-500/15 border border-sky-500/30 px-3 py-1.5 text-[11px] font-semibold text-sky-300 hover:bg-sky-500/25 disabled:opacity-40 transition">
+                              {actionId === s.id + "-resend"
+                                ? <div className="h-3 w-3 rounded-full border-2 border-sky-300/30 border-t-sky-300 animate-spin" />
+                                : <Send className="h-3 w-3" />}
+                              Resend
                             </button>
                           )}
                           {s.status !== "rejected" && (
