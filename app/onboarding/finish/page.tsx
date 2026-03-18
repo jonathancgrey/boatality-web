@@ -100,10 +100,20 @@ export default function OnboardingFinish() {
       {/* Heading */}
       <div className="space-y-2">
         <h1 className="text-2xl font-bold text-white tracking-tight">
-          {name ? `You're all set, ${name}!` : "You're all set!"}
+          {name ? `Welcome aboard, ${name}.` : "Welcome aboard."}
         </h1>
         <p className="text-white/50 text-sm">
-          Your Boatality Studio is live and ready to publish.
+          Your studio is set up. You're one of the first creators on Boatality.
+        </p>
+      </div>
+
+      {/* Pre-launch context */}
+      <div className="rounded-xl border border-[#C84121]/30 bg-[#C84121]/8 px-4 py-3.5 text-left space-y-1">
+        <p className="text-sm font-semibold text-white/90">🚀 You're in pre-launch</p>
+        <p className="text-xs text-white/50 leading-relaxed">
+          The platform isn't open to viewers yet — we're getting creators set up first.
+          Publish your content now so there's something great to discover when users arrive.
+          We'll let you know when the doors open.
         </p>
       </div>
 
@@ -130,30 +140,30 @@ export default function OnboardingFinish() {
       {/* What's next */}
       <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-left space-y-2.5">
         <p className="text-xs font-semibold uppercase tracking-wide text-white/50">
-          What's next
+          Your next moves
         </p>
         <ul className="space-y-2 text-sm text-white/60">
           <li className="flex items-start gap-2.5">
-            <span className="mt-0.5 text-blue-400 flex-shrink-0">→</span>
+            <span className="mt-0.5 text-[#f4845f] flex-shrink-0">→</span>
             Upload your first piece of content
           </li>
           <li className="flex items-start gap-2.5">
-            <span className="mt-0.5 text-blue-400 flex-shrink-0">→</span>
+            <span className="mt-0.5 text-[#f4845f] flex-shrink-0">→</span>
             Customize your channel names and descriptions
           </li>
           <li className="flex items-start gap-2.5">
-            <span className="mt-0.5 text-blue-400 flex-shrink-0">→</span>
-            Add more channels as your content grows
+            <span className="mt-0.5 text-[#f4845f] flex-shrink-0">→</span>
+            Keep an eye on your inbox — we'll tell you when users get access
           </li>
         </ul>
       </div>
 
       {/* CTA */}
       <Link
-        href="/dashboard"
-        className="flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3.5 rounded-xl transition-colors tap-scale glow-hover"
+        href="/dashboard/content"
+        className="flex items-center justify-center gap-2 w-full bg-[#C84121] hover:bg-[#d94e2a] text-white font-semibold py-3.5 rounded-xl transition-colors"
       >
-        Go to your dashboard
+        Go to your studio
         <ArrowRight size={16} />
       </Link>
     </div>

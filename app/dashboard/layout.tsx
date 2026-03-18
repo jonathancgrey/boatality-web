@@ -17,7 +17,7 @@ import {
   LogOut,
   ExternalLink,
   Menu,
-  X,
+  Rocket,
 } from "lucide-react";
 
 type NavItem = {
@@ -187,6 +187,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
         <main className="flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-8">
+          {/* Pre-launch beta banner */}
+          <div className="mb-6 flex items-start gap-3 rounded-xl border border-[#C84121]/30 bg-[#C84121]/8 px-4 py-3.5">
+            <Rocket className="h-4 w-4 text-[#f4845f] flex-shrink-0 mt-0.5" />
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-white/90">You're in pre-launch beta</p>
+              <p className="text-xs text-white/45 mt-0.5 leading-relaxed">
+                The platform isn't open to viewers yet — we're building the creator side first.
+                Publish your content now so there's something to discover when users arrive.
+                We'll let you know when the doors open.
+              </p>
+            </div>
+          </div>
           {children}
         </main>
       </div>

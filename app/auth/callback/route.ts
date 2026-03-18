@@ -48,7 +48,8 @@ export async function GET(request: Request) {
     .eq("id", user.id)
     .maybeSingle();
 
-  const destination = creator ? "/dashboard/content" : "/onboarding";
+  // New users (no creator row yet) need to set a password before onboarding
+  const destination = creator ? "/dashboard/content" : "/set-password";
 
   return NextResponse.redirect(new URL(destination, url.origin));
 }
