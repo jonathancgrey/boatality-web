@@ -188,15 +188,22 @@ export default function SettingsPage() {
     setResetError(null);
     setResetSent(false);
 
-    const { error } = await supabase.auth.resetPasswordForEmail(settings.email, {
-      redirectTo: `${window.location.origin}/auth/callback?next=/dashboard/settings`,
-    });
-
-    setSendingReset(false);
-    if (error) {
-      setResetError(error.message);
-    } else {
-      setResetSent(true);
+    try {
+      const res = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: settings.email }),
+      });
+      const json = await res.json();
+      if (!json.ok) {
+        setResetError("Something went wrong. Please try again.");
+      } else {
+        setResetSent(true);
+      }
+    } catch {
+      setResetError("Something went wrong. Please try again.");
+    } finally {
+      setSendingReset(false);
     }
   }
 
