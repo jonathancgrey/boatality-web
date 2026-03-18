@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { Resend } from "resend";
+import fs from "fs";
+import path from "path";
 
 function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -155,6 +158,25 @@ export async function POST(req: Request) {
 
     if (error) {
       return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    }
+
+    // Send branded confirmation email
+    try {
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      const templatePath = path.join(
+        process.cwd(),
+        "supabase/email-templates/waitlist-sequence/01-confirmation.html"
+      );
+      const emailHtml = fs.readFileSync(templatePath, "utf-8");
+
+      await resend.emails.send({
+        from: "Jonathan at Boatality <jonathan@boatality.com>",
+        to: email,
+        subject: "You're in. Welcome aboard. — Boatality",
+        html: emailHtml,
+      });
+    } catch {
+      // Don't fail the signup if the email errors — the row is already saved
     }
 
     return NextResponse.json({ ok: true });
