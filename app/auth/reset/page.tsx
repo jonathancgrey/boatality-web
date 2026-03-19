@@ -3,16 +3,13 @@
 /**
  * /auth/reset — Password-reset landing page
  *
- * Supabase's recovery links redirect here after the OTP is verified.
- * Depending on the project's auth flow settings, tokens may arrive either:
- *   a) as a PKCE code  →  ?code=XXXX  (query param, exchangeable server-side)
- *   b) as hash tokens  →  #access_token=...&type=recovery  (client-side only)
+ * Supabase's generateLink({type:"recovery"}) redirects here with hash-fragment
+ * tokens: #access_token=...&refresh_token=...&type=recovery
  *
- * This client component handles both cases, then hands off to /set-password
- * once a valid session is established.
+ * createBrowserClient from @supabase/ssr runs in PKCE mode and ignores hash
+ * tokens entirely, so we must parse them manually and call setSession().
  *
- * NOTE: useSearchParams() requires a Suspense boundary in Next.js 14 App Router.
- * The inner component reads search params; the default export wraps it in Suspense.
+ * Also handles the PKCE ?code= path as a fallback, just in case.
  */
 
 import { Suspense, useEffect } from "react";
@@ -34,11 +31,33 @@ function ResetHandler() {
   const supabase = createClient();
 
   useEffect(() => {
-    let unsubscribe: (() => void) | undefined;
     let fallbackTimer: ReturnType<typeof setTimeout>;
 
     async function handle() {
-      // ── Case A: PKCE code in query param ──────────────────────────────────
+      // ── Path A: Hash-fragment tokens from generateLink() recovery redirect ──
+      // e.g. /auth/reset#access_token=xxx&refresh_token=xxx&type=recovery
+      const hash = window.location.hash.slice(1); // strip leading #
+      if (hash) {
+        const params = new URLSearchParams(hash);
+        const accessToken = params.get("access_token");
+        const refreshToken = params.get("refresh_token");
+
+        if (accessToken && refreshToken) {
+          const { error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+
+          if (!error) {
+            // Clear the hash so tokens aren't sitting in the URL
+            window.history.replaceState(null, "", window.location.pathname);
+            router.replace("/set-password");
+            return;
+          }
+        }
+      }
+
+      // ── Path B: PKCE code in query param (fallback) ────────────────────────
       const code = searchParams.get("code");
       if (code) {
         const { error } = await supabase.auth.exchangeCodeForSession(code);
@@ -46,43 +65,26 @@ function ResetHandler() {
           router.replace("/set-password");
           return;
         }
-        // If exchange failed, fall through and try hash-token path
       }
 
-      // ── Case B: Hash-fragment tokens (implicit flow) ───────────────────────
-      // The Supabase client automatically detects and processes hash tokens on
-      // initialisation, firing a PASSWORD_RECOVERY (or SIGNED_IN) event.
-      const { data } = supabase.auth.onAuthStateChange((event, session) => {
-        if (
-          (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") &&
-          session
-        ) {
-          clearTimeout(fallbackTimer);
-          router.replace("/set-password");
-        }
-      });
-      unsubscribe = data.subscription.unsubscribe;
-
-      // ── Already has session (e.g. user navigates back) ────────────────────
+      // ── Path C: Session already exists (user navigated back) ───────────────
       const {
         data: { session },
       } = await supabase.auth.getSession();
       if (session) {
-        clearTimeout(fallbackTimer);
         router.replace("/set-password");
         return;
       }
 
-      // ── Fallback: nothing fired after 6 seconds → back to login ───────────
+      // ── Fallback: nothing worked → back to login ───────────────────────────
       fallbackTimer = setTimeout(() => {
         router.replace("/login");
-      }, 6000);
+      }, 5000);
     }
 
     handle();
 
     return () => {
-      unsubscribe?.();
       clearTimeout(fallbackTimer);
     };
   }, []);
@@ -90,8 +92,7 @@ function ResetHandler() {
   return <Spinner />;
 }
 
-// Suspense boundary required by Next.js 14 whenever useSearchParams() is used
-// inside a client component that isn't already inside a Suspense boundary.
+// Suspense boundary required by Next.js 14 for useSearchParams()
 export default function AuthReset() {
   return (
     <Suspense fallback={<Spinner />}>
