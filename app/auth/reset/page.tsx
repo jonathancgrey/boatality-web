@@ -10,13 +10,25 @@
  *
  * This client component handles both cases, then hands off to /set-password
  * once a valid session is established.
+ *
+ * NOTE: useSearchParams() requires a Suspense boundary in Next.js 14 App Router.
+ * The inner component reads search params; the default export wraps it in Suspense.
  */
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabaseClient";
 
-export default function AuthReset() {
+function Spinner() {
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-[#020b16]">
+      <div className="w-6 h-6 border-2 border-white/20 border-t-[#C84121] rounded-full animate-spin" />
+      <p className="text-xs text-white/30">Verifying your reset link…</p>
+    </div>
+  );
+}
+
+function ResetHandler() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
@@ -34,7 +46,7 @@ export default function AuthReset() {
           router.replace("/set-password");
           return;
         }
-        // If exchange failed fall through and try hash-token path
+        // If exchange failed, fall through and try hash-token path
       }
 
       // ── Case B: Hash-fragment tokens (implicit flow) ───────────────────────
@@ -52,7 +64,9 @@ export default function AuthReset() {
       unsubscribe = data.subscription.unsubscribe;
 
       // ── Already has session (e.g. user navigates back) ────────────────────
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (session) {
         clearTimeout(fallbackTimer);
         router.replace("/set-password");
@@ -73,10 +87,15 @@ export default function AuthReset() {
     };
   }, []);
 
+  return <Spinner />;
+}
+
+// Suspense boundary required by Next.js 14 whenever useSearchParams() is used
+// inside a client component that isn't already inside a Suspense boundary.
+export default function AuthReset() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-[#020b16]">
-      <div className="w-6 h-6 border-2 border-white/20 border-t-[#C84121] rounded-full animate-spin" />
-      <p className="text-xs text-white/30">Verifying your reset link…</p>
-    </div>
+    <Suspense fallback={<Spinner />}>
+      <ResetHandler />
+    </Suspense>
   );
 }
