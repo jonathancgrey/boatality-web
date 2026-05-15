@@ -34,6 +34,12 @@ export async function GET(request: Request) {
     }
   }
 
+  // If a ?next= param was passed (e.g. from a password reset link), honour it
+  const next = url.searchParams.get("next");
+  if (next && next.startsWith("/")) {
+    return NextResponse.redirect(new URL(next, url.origin));
+  }
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -44,11 +50,13 @@ export async function GET(request: Request) {
 
   const { data: creator } = await supabase
     .from("creators_v2")
-    .select("id")
+    .select("onboarding_completed")
     .eq("id", user.id)
     .maybeSingle();
 
-  const destination = creator ? "/dashboard" : "/onboarding";
+  // Only send to dashboard if they've actually finished onboarding.
+  // Trigger-created skeleton rows have onboarding_completed = false.
+  const destination = creator?.onboarding_completed ? "/dashboard/content" : "/set-password";
 
   return NextResponse.redirect(new URL(destination, url.origin));
 }

@@ -22,7 +22,8 @@ export async function uploadContent(formData: FormData) {
 
   const channelId = formData.get("channelId")?.toString();
   const title = formData.get("title")?.toString();
-  const description = formData.get("description")?.toString();
+  const description = formData.get("description")?.toString() || null;
+  const body = formData.get("body")?.toString() || null; // full article text
   const primaryCategory = formData.get("primaryCategory")?.toString();
   const contentType = formData.get("contentType")?.toString(); // content_v2.type
 
@@ -93,8 +94,12 @@ export async function uploadContent(formData: FormData) {
 
   const { mediaUrl, mediaKey: _mediaKey } = normalizeMediaUrl(mediaUrlRaw);
 
-  if (!channelId || !title || !contentType || !mediaUrl) {
-    return { error: "Missing required fields (channelId/title/contentType/mediaUrl)." };
+  // Articles have no media file — their body lives in description
+  if (!channelId || !title || !contentType) {
+    return { error: "Missing required fields." };
+  }
+  if (contentType !== "article" && !mediaUrl) {
+    return { error: "A media file is required for videos and podcasts." };
   }
 
   // Validate channel ownership
@@ -144,7 +149,8 @@ export async function uploadContent(formData: FormData) {
     type: contentType,
     title,
     description,
-    media_url: mediaUrl,
+    body: body ?? null,
+    media_url: mediaUrl ?? null,
     // Optional: keep key for debugging/migrations later (only if your table has the column)
     // media_key: mediaKey,
     thumbnail_url: thumbnailUrl,

@@ -5,8 +5,6 @@ import {
   Mic2,
   FileText as FileTextIcon,
   Layers,
-  Search,
-  Filter,
   Upload as UploadIcon,
 } from "lucide-react";
 
@@ -74,317 +72,268 @@ export default async function ContentLibraryPage({
   const podcasts = items.filter((i) => i.type === "podcast").length;
   const articles = items.filter((i) => i.type === "article").length;
 
-  const renderTypeBadge = (type: string) => {
-    if (type === "video") {
-      return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-sky-500/10 px-3 py-1 text-[11px] font-medium text-sky-100 border border-sky-500/30">
-          <Film className="h-3 w-3" />
-          Video
-        </span>
-      );
-    }
-    if (type === "podcast") {
-      return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-3 py-1 text-[11px] font-medium text-emerald-100 border border-emerald-500/30">
-          <Mic2 className="h-3 w-3" />
-          Podcast
-        </span>
-      );
-    }
-    if (type === "article") {
-      return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-3 py-1 text-[11px] font-medium text-amber-100 border border-amber-500/30">
-            <FileTextIcon className="h-3 w-3" />
-          Article
-        </span>
-      );
-    }
+  const TypeBadge = ({ type }: { type: string }) => {
+    if (type === "video") return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-sky-500/10 px-2.5 py-0.5 text-[11px] font-medium text-sky-200 border border-sky-500/30">
+        <Film className="h-3 w-3" /> Video
+      </span>
+    );
+    if (type === "podcast") return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-medium text-emerald-200 border border-emerald-500/30">
+        <Mic2 className="h-3 w-3" /> Podcast
+      </span>
+    );
+    if (type === "article") return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-medium text-amber-200 border border-amber-500/30">
+        <FileTextIcon className="h-3 w-3" /> Article
+      </span>
+    );
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-[11px] font-medium text-slate-100 border border-white/20">
+      <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] font-medium text-slate-100 border border-white/20">
         Other
       </span>
     );
   };
 
+  const StatusBadge = ({ status }: { status: string | null }) => (
+    <span className="inline-flex rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] text-slate-100 capitalize">
+      {status ?? "unknown"}
+    </span>
+  );
+
   return (
-    <div className="relative w-full max-w-7xl mx-auto py-10 bg-transparent">
-      {/* Ambient background like dashboard */}
+    <div className="relative w-full max-w-7xl mx-auto">
+      {/* Ambient background */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute -top-32 -left-24 h-80 w-80 rounded-full bg-[#127AB2]/20 blur-3xl" />
         <div className="absolute -bottom-40 -right-10 h-96 w-96 rounded-full bg-[#C84121]/20 blur-3xl" />
       </div>
 
-      <div className="rounded-[32px] border border-white/10 bg-gradient-to-br from-[#001522] via-[#012C44] to-[#000910] px-8 pb-9 pt-7 shadow-2xl shadow-black/40 backdrop-blur-2xl space-y-8">
-        {/* Header */}
-        <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.16em] text-slate-200/70">
-              Library
-            </p>
-            <h1 className="mt-2 text-3xl md:text-[32px] font-semibold tracking-tight text-slate-50">
-              Your content on Boatality
-            </h1>
-            <p className="mt-2 text-sm text-slate-200/80 max-w-xl">
-              Every video, podcast, and logbook entry you&apos;ve launched.
-              Fine-tune your catalog and keep your fleet organized.
-            </p>
-          </div>
+      <div className="rounded-2xl md:rounded-[32px] border border-white/10 bg-gradient-to-br from-[#001522] via-[#012C44] to-[#000910] px-4 md:px-8 pb-8 pt-6 shadow-2xl shadow-black/40 backdrop-blur-2xl space-y-6 md:space-y-8">
 
-          <div className="flex flex-wrap gap-3">
-            <Link
-              href="/dashboard/upload"
-              className="inline-flex items-center gap-2 rounded-full bg-[#C84121] px-5 py-2.5 text-xs font-semibold text-white shadow-lg shadow-black/50 transition-all hover:-translate-y-0.5 hover:bg-[#a3321c]"
-            >
-              <UploadIcon className="h-4 w-4" />
-              Upload new content
-            </Link>
+        {/* Header */}
+        <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.16em] text-slate-200/70">Library</p>
+            <h1 className="mt-1.5 text-2xl md:text-[32px] font-semibold tracking-tight text-slate-50">
+              Your content
+            </h1>
+            <p className="mt-1.5 text-sm text-slate-200/70 max-w-xl">
+              Every video, podcast, and article you've published.
+            </p>
           </div>
+          <Link
+            href="/dashboard/upload"
+            className="self-start inline-flex items-center gap-2 rounded-full bg-[#C84121] px-5 py-2.5 text-xs font-semibold text-white shadow-lg shadow-black/50 transition-all hover:-translate-y-0.5 hover:bg-[#a3321c] flex-shrink-0"
+          >
+            <UploadIcon className="h-4 w-4" />
+            Upload
+          </Link>
         </header>
 
-        {/* Stat row */}
-        <section className="grid gap-4 md:grid-cols-4">
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-lg shadow-black/20 flex flex-col justify-between">
+        {/* Stat row — 2 cols on mobile, 4 on desktop */}
+        <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-4 flex flex-col justify-between">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] uppercase tracking-[0.16em] text-slate-200/70">
-                Total
-              </span>
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-sky-500/20">
-                <Layers className="h-4 w-4 text-sky-100" />
+              <span className="text-[11px] uppercase tracking-[0.14em] text-slate-200/60">Total</span>
+              <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-500/20">
+                <Layers className="h-3.5 w-3.5 text-sky-200" />
               </span>
             </div>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-2xl font-semibold text-slate-50">
-                {total}
-              </span>
-              <span className="text-xs text-slate-200/80">
-                published & drafts
-              </span>
+            <div className="mt-2 flex items-baseline gap-1.5">
+              <span className="text-2xl font-semibold text-slate-50">{total}</span>
+              <span className="text-xs text-slate-200/60">items</span>
             </div>
           </div>
-
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-lg shadow-black/20">
-            <p className="text-[11px] uppercase tracking-[0.16em] text-slate-200/70">
-              Videos
-            </p>
-            <p className="mt-2 text-2xl font-semibold text-slate-50">
-              {videos}
-            </p>
-            <p className="text-xs text-slate-200/80 mt-1">
-              Long-form, walkthroughs, and more.
-            </p>
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <p className="text-[11px] uppercase tracking-[0.14em] text-slate-200/60">Videos</p>
+            <p className="mt-2 text-2xl font-semibold text-slate-50">{videos}</p>
           </div>
-
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-lg shadow-black/20">
-            <p className="text-[11px] uppercase tracking-[0.16em] text-slate-200/70">
-              Podcasts
-            </p>
-            <p className="mt-2 text-2xl font-semibold text-slate-50">
-              {podcasts}
-            </p>
-            <p className="text-xs text-slate-200/80 mt-1">
-              Conversations from the waterline.
-            </p>
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <p className="text-[11px] uppercase tracking-[0.14em] text-slate-200/60">Podcasts</p>
+            <p className="mt-2 text-2xl font-semibold text-slate-50">{podcasts}</p>
           </div>
-
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-lg shadow-black/20">
-            <p className="text-[11px] uppercase tracking-[0.16em] text-slate-200/70">
-              Articles
-            </p>
-            <p className="mt-2 text-2xl font-semibold text-slate-50">
-              {articles}
-            </p>
-            <p className="text-xs text-slate-200/80 mt-1">
-              Logbook entries & write-ups.
-            </p>
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <p className="text-[11px] uppercase tracking-[0.14em] text-slate-200/60">Articles</p>
+            <p className="mt-2 text-2xl font-semibold text-slate-50">{articles}</p>
           </div>
         </section>
 
-        {/* Controls */}
-        <section className="flex flex-col md:flex-row md:items-center gap-4 justify-between">
-          <div className="flex flex-col gap-3 flex-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <Link
-                href="/dashboard/content?type=all"
-                className={`rounded-full px-4 py-2 text-[11px] font-semibold transition border ${
-                  activeType === "all"
-                    ? "bg-white/10 border-white/20 text-white"
-                    : "bg-white/5 border-white/10 text-white/80 hover:bg-white/10"
-                }`}
-              >
-                All
-              </Link>
-              <Link
-                href="/dashboard/content?type=video"
-                className={`rounded-full px-4 py-2 text-[11px] font-semibold transition border ${
-                  activeType === "video"
-                    ? "bg-sky-500/10 border-sky-500/30 text-sky-100"
-                    : "bg-white/5 border-white/10 text-white/80 hover:bg-white/10"
-                }`}
-              >
-                Videos
-              </Link>
-              <Link
-                href="/dashboard/content?type=podcast"
-                className={`rounded-full px-4 py-2 text-[11px] font-semibold transition border ${
-                  activeType === "podcast"
-                    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-100"
-                    : "bg-white/5 border-white/10 text-white/80 hover:bg-white/10"
-                }`}
-              >
-                Podcasts
-              </Link>
-              <Link
-                href="/dashboard/content?type=article"
-                className={`rounded-full px-4 py-2 text-[11px] font-semibold transition border ${
-                  activeType === "article"
-                    ? "bg-amber-500/10 border-amber-500/30 text-amber-100"
-                    : "bg-white/5 border-white/10 text-white/80 hover:bg-white/10"
-                }`}
-              >
-                Articles
-              </Link>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="relative flex-1 max-w-md">
-                <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
-                  <Search className="h-4 w-4" />
-                </span>
-                <input
-                  className="w-full rounded-full border border-white/15 bg-black/30 pl-10 pr-4 py-2 text-xs text-slate-50 placeholder:text-slate-400 shadow-inner shadow-black/40 outline-none focus:ring-1 focus:ring-sky-400/70"
-                  placeholder="Search your titles (visual only for now)"
-                />
-              </div>
-            </div>
-          </div>
-
-          <button className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-[11px] font-medium text-slate-100 shadow-sm shadow-black/30">
-            <Filter className="h-3 w-3" />
-            Filters coming soon
-          </button>
+        {/* Filter tabs */}
+        <section className="flex items-center gap-2 flex-wrap">
+          {(["all", "video", "podcast", "article"] as const).map((t) => (
+            <Link
+              key={t}
+              href={`/dashboard/content?type=${t}`}
+              className={`rounded-full px-4 py-1.5 text-[11px] font-semibold transition border ${
+                activeType === t
+                  ? t === "video"   ? "bg-sky-500/10 border-sky-500/30 text-sky-100"
+                  : t === "podcast" ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-100"
+                  : t === "article" ? "bg-amber-500/10 border-amber-500/30 text-amber-100"
+                  : "bg-white/10 border-white/20 text-white"
+                  : "bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white/90"
+              }`}
+            >
+              {t === "all" ? "All" : t.charAt(0).toUpperCase() + t.slice(1) + "s"}
+            </Link>
+          ))}
         </section>
 
-        {/* Table */}
-        <section className="rounded-2xl border border-white/10 bg-black/20 shadow-lg shadow-black/30 overflow-hidden">
-          <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
+        {/* Content list */}
+        <section className="rounded-2xl border border-white/10 bg-black/20 overflow-hidden">
+          <div className="flex items-center justify-between border-b border-white/10 px-4 md:px-6 py-4">
             <div>
               <h2 className="text-sm font-semibold text-slate-50">
-                Recent voyages
+                {activeType === "all" ? "All content" : activeType.charAt(0).toUpperCase() + activeType.slice(1) + "s"}
               </h2>
-              <p className="text-[11px] text-slate-200/80">
-                {activeType === "all"
-                  ? "The latest episodes, logs, and uploads you’ve shared."
-                  : `Showing your latest ${activeType}s.`}
+              <p className="text-[11px] text-slate-200/60 mt-0.5">
+                {items.length} {items.length === 1 ? "item" : "items"}
               </p>
             </div>
-            <Link
-              href="/dashboard/upload"
-              className="text-[11px] font-semibold text-sky-300 hover:text-sky-200"
-            >
+            <Link href="/dashboard/upload" className="text-[11px] font-semibold text-sky-300 hover:text-sky-200">
               New upload →
             </Link>
           </div>
 
           {items.length === 0 ? (
-            <div className="px-6 py-8 text-sm text-slate-200/90">
-              <p>
+            <div className="px-4 md:px-6 py-10 text-center">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 border border-white/10 mb-4">
+                <UploadIcon className="h-5 w-5 text-white/30" />
+              </div>
+              <p className="text-sm text-slate-200/60">
                 {activeType === "all"
                   ? "No uploads yet — your next adventure begins with your first post."
-                  : `No ${activeType}s yet — upload your first one to get started.`}
+                  : `No ${activeType}s yet.`}
               </p>
-              <div className="mt-2">
-                <Link
-                  href="/dashboard/upload"
-                  className="inline-flex text-[11px] font-semibold text-sky-300 hover:text-sky-200"
-                >
-                  Upload your first piece →
-                </Link>
-              </div>
+              <Link
+                href="/dashboard/upload"
+                className="inline-block mt-3 text-[11px] font-semibold text-sky-300 hover:text-sky-200"
+              >
+                Upload your first piece →
+              </Link>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-sm">
-                <thead className="bg-white/5 text-left text-[11px] uppercase tracking-[0.16em] text-slate-200/70">
-                  <tr>
-                    <th className="px-6 py-3 font-medium">Asset</th>
-                    {activeType === "all" ? (
-                      <th className="px-4 py-3 font-medium">Type</th>
-                    ) : null}
-                    <th className="px-4 py-3 font-medium">Channel</th>
-                    <th className="px-4 py-3 font-medium">Status</th>
-                    <th className="px-4 py-3 font-medium">Created</th>
-                    <th className="px-4 py-3 font-medium text-right">Open</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {items.map((item) => (
-                    <tr
-                      key={item.id}
-                      className="border-t border-white/8 bg-transparent transition hover:bg-white/5"
+            <>
+              {/* ── Mobile: card list (hidden on md+) ── */}
+              <ul className="md:hidden divide-y divide-white/[0.06]">
+                {items.map((item) => (
+                  <li key={item.id}>
+                    <Link
+                      href={`/dashboard/content/${item.id}`}
+                      className="flex items-center gap-3 px-4 py-3.5 hover:bg-white/[0.04] transition-colors"
                     >
-                      <td className="px-6 py-3 align-middle">
-                        <div className="flex items-center gap-4">
-                          <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/5">
-                            {item.thumbnail_url ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img
-                                src={item.thumbnail_url}
-                                alt={item.title}
-                                className="h-full w-full object-cover"
-                                loading="lazy"
-                              />
-                            ) : (
-                              <div className="flex h-full w-full items-center justify-center text-slate-300/70">
-                                <FileTextIcon className="h-5 w-5" />
-                              </div>
-                            )}
+                      {/* Thumbnail */}
+                      <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/5">
+                        {item.thumbnail_url ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={item.thumbnail_url}
+                            alt={item.title}
+                            className="h-full w-full object-cover"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-slate-300/50">
+                            <FileTextIcon className="h-5 w-5" />
                           </div>
+                        )}
+                      </div>
 
-                          <div className="flex min-w-0 flex-col">
-                            <Link
-                              href={`/dashboard/content/${item.id}`}
-                              className="line-clamp-1 font-medium text-slate-50 hover:text-sky-200"
-                            >
-                              {item.title}
-                            </Link>
-                            <span className="mt-0.5 line-clamp-1 text-[11px] text-slate-300/70">
-                              {item.channels_v2?.[0]?.name || "No channel assigned"}
-                            </span>
-                          </div>
+                      {/* Info */}
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-slate-50 leading-snug">
+                          {item.title}
+                        </p>
+                        <div className="mt-1 flex items-center gap-2 flex-wrap">
+                          <TypeBadge type={item.type} />
+                          <StatusBadge status={item.status} />
                         </div>
-                      </td>
+                      </div>
 
-                      {activeType === "all" ? (
-                        <td className="px-4 py-3 align-middle">{renderTypeBadge(item.type)}</td>
-                      ) : null}
+                      {/* Arrow */}
+                      <span className="text-white/25 text-xs flex-shrink-0">›</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
 
-                      <td className="px-4 py-3 align-middle text-slate-200/85">
-                        {item.channels_v2?.[0]?.name || "—"}
-                      </td>
-
-                      <td className="px-4 py-3 align-middle">
-                        <span className="inline-flex rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] text-slate-100 capitalize">
-                          {item.status ?? "unknown"}
-                        </span>
-                      </td>
-
-                      <td className="px-4 py-3 align-middle text-[11px] text-slate-300/80">
-                        {new Date(item.created_at).toLocaleDateString()}
-                      </td>
-
-                      <td className="px-4 py-3 align-middle text-right text-[11px]">
-                        <Link
-                          href={`/dashboard/content/${item.id}`}
-                          className="text-sky-300 hover:text-sky-200 font-semibold"
-                        >
-                          View details →
-                        </Link>
-                      </td>
+              {/* ── Desktop: table (hidden on mobile) ── */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="min-w-full text-sm">
+                  <thead className="bg-white/5 text-left text-[11px] uppercase tracking-[0.16em] text-slate-200/50">
+                    <tr>
+                      <th className="px-6 py-3 font-medium">Asset</th>
+                      {activeType === "all" && <th className="px-4 py-3 font-medium">Type</th>}
+                      <th className="px-4 py-3 font-medium">Channel</th>
+                      <th className="px-4 py-3 font-medium">Status</th>
+                      <th className="px-4 py-3 font-medium">Created</th>
+                      <th className="px-4 py-3 font-medium text-right">Open</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {items.map((item) => (
+                      <tr
+                        key={item.id}
+                        className="border-t border-white/8 bg-transparent transition hover:bg-white/5"
+                      >
+                        <td className="px-6 py-3 align-middle">
+                          <div className="flex items-center gap-4">
+                            <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/5">
+                              {item.thumbnail_url ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                  src={item.thumbnail_url}
+                                  alt={item.title}
+                                  className="h-full w-full object-cover"
+                                  loading="lazy"
+                                />
+                              ) : (
+                                <div className="flex h-full w-full items-center justify-center text-slate-300/50">
+                                  <FileTextIcon className="h-5 w-5" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex min-w-0 flex-col">
+                              <Link
+                                href={`/dashboard/content/${item.id}`}
+                                className="line-clamp-1 font-medium text-slate-50 hover:text-sky-200"
+                              >
+                                {item.title}
+                              </Link>
+                              <span className="mt-0.5 line-clamp-1 text-[11px] text-slate-300/60">
+                                {item.channels_v2?.[0]?.name || "No channel assigned"}
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+                        {activeType === "all" && (
+                          <td className="px-4 py-3 align-middle">
+                            <TypeBadge type={item.type} />
+                          </td>
+                        )}
+                        <td className="px-4 py-3 align-middle text-slate-200/70 text-[13px]">
+                          {item.channels_v2?.[0]?.name || "—"}
+                        </td>
+                        <td className="px-4 py-3 align-middle">
+                          <StatusBadge status={item.status} />
+                        </td>
+                        <td className="px-4 py-3 align-middle text-[11px] text-slate-300/60">
+                          {new Date(item.created_at).toLocaleDateString()}
+                        </td>
+                        <td className="px-4 py-3 align-middle text-right">
+                          <Link
+                            href={`/dashboard/content/${item.id}`}
+                            className="text-[11px] font-semibold text-sky-300 hover:text-sky-200"
+                          >
+                            View →
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </section>
       </div>

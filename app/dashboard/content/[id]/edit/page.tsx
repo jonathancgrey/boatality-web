@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { supabaseBrowser } from "@/lib/supabaseBrowser";
+import { createClient } from "@/lib/supabaseClient";
 import { ArrowLeft, Loader2, Save } from "lucide-react";
 
 type ContentRow = {
@@ -18,7 +18,7 @@ export default function EditContentPage({
   params: { id: string };
 }) {
   const router = useRouter();
-  const supabase = supabaseBrowser();
+  const supabase = createClient();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

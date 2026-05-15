@@ -23,22 +23,18 @@ export default function ChannelsPage() {
 
   const [savingId, setSavingId] = useState<string | null>(null);
   const [status, setStatus] = useState<string>("");
-  const [debug, setDebug] = useState<any>(null);
 
   async function load() {
     setLoading(true);
     setStatus("");
-    setDebug(null);
 
     const { data: userData, error: userErr } = await supabase.auth.getUser();
-    console.log("[channels] getUser:", { userErr, user: userData?.user });
 
     if (userErr || !userData?.user) {
       setUserId(null);
       setChannels([]);
       setLoading(false);
       setStatus("You must be logged in.");
-      setDebug({ step: "auth.getUser", userErr });
       return;
     }
 
@@ -50,12 +46,9 @@ export default function ChannelsPage() {
       .eq("creator_id", userData.user.id)
       .order("created_at", { ascending: true });
 
-    console.log("[channels] select:", { chErr, count: ch?.length, rows: ch });
-
     if (chErr) {
       setChannels([]);
       setStatus(`Failed to load channels: ${chErr.message}`);
-      setDebug({ step: "channels_v2 select", chErr });
       setLoading(false);
       return;
     }
@@ -81,11 +74,9 @@ export default function ChannelsPage() {
     ];
 
     const { error } = await supabase.from("channels_v2").insert(payload);
-    console.log("[channels] insert defaults:", { error });
 
     if (error) {
       setStatus(`Channel creation failed: ${error.message}`);
-      setDebug({ step: "channels_v2 insert", error });
       return;
     }
 
@@ -106,11 +97,8 @@ export default function ChannelsPage() {
       .eq("id", channel.id)
       .eq("creator_id", channel.creator_id);
 
-    console.log("[channels] update:", { id: channel.id, error });
-
     if (error) {
       setStatus(`Save failed: ${error.message}`);
-      setDebug({ step: "channels_v2 update", error });
       setSavingId(null);
       return;
     }
@@ -145,15 +133,8 @@ export default function ChannelsPage() {
           </div>
         )}
 
-        {debug && (
-          <pre className="rounded-xl border border-white/10 bg-black/40 p-3 text-xs text-slate-200 overflow-auto">
-{JSON.stringify(debug, null, 2)}
-          </pre>
-        )}
-
         <div className="text-xs text-slate-400">
-          <span className="font-mono">auth uid:</span> {userId ?? "none"} •{" "}
-          <span className="font-mono">channels loaded:</span> {channels.length}
+          {channels.length} channel{channels.length !== 1 ? "s" : ""}
         </div>
 
         {channels.length === 0 ? (
