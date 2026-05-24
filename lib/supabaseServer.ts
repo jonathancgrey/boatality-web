@@ -1,7 +1,9 @@
 import { cookies } from "next/headers";
 import { createServerClient as _createServerClient } from "@supabase/ssr";
 
-// This is the function all pages expect:
+// @supabase/ssr 0.5+ uses getAll/setAll. The old get/set/remove interface does
+// not read chunked cookies (sb-*-auth-token.0, .1, …) so getUser() returned
+// null in server actions, blocking every authenticated upload/insert.
 export function createServerClient() {
   const cookieStore = cookies();
 
@@ -10,19 +12,22 @@ export function createServerClient() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
+        getAll() {
+          return cookieStore.getAll();
         },
-        set() {
-          // no-op on server
-        },
-        remove() {
-          // no-op on server
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            );
+          } catch {
+            // Called from a Server Component — ignore. Middleware handles refresh.
+          }
         },
       },
     }
   );
 }
 
-// Optional: keep backwards compatibility if anything still calls supabaseServer()
+// Backwards-compat alias
 export const supabaseServer = createServerClient;
