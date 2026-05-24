@@ -17,9 +17,7 @@ export async function uploadContent(formData: FormData) {
 
   const {
     data: { user },
-    error: authError,
   } = await supabase.auth.getUser();
-  console.log("[upload] auth:", user?.id ?? "null", authError?.message ?? "ok");
   if (!user) return { error: "Not logged in." };
 
   const channelId = formData.get("channelId")?.toString();
@@ -112,7 +110,6 @@ export async function uploadContent(formData: FormData) {
     .eq("creator_id", user.id)
     .maybeSingle();
 
-  console.log("[upload] channel:", channel?.id ?? "null", channelErr?.message ?? "ok");
   if (!channel) return { error: "Invalid channel." };
 
   // TEMP: keep thumbnail in Supabase storage until we move it to B2
@@ -159,7 +156,6 @@ export async function uploadContent(formData: FormData) {
     status: "draft",
   });
 
-  console.log("[upload] insert:", dbError ? `ERROR: ${dbError.message}` : "ok", contentId);
   if (dbError) return { error: dbError.message };
 
   revalidatePath("/dashboard/content");
