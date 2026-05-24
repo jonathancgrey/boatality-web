@@ -27,6 +27,8 @@ export async function multipartUploadToB2(opts: {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ key, contentType }),
     signal,
+  }).catch((err) => {
+    throw new Error(`Upload failed at initiate: ${err?.message ?? err}`);
   });
 
   const initJson: any = await initRes.json().catch(() => ({}));
@@ -54,6 +56,8 @@ export async function multipartUploadToB2(opts: {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ key, uploadId, partNumber }),
       signal,
+    }).catch((err) => {
+      throw new Error(`Upload failed at presign (part ${partNumber}): ${err?.message ?? err}`);
     });
 
     const presignJson: any = await presignRes.json().catch(() => ({}));
@@ -67,6 +71,8 @@ export async function multipartUploadToB2(opts: {
       body: chunk,
       // IMPORTANT: do NOT add extra headers unless you also sign them server-side.
       signal,
+    }).catch((err) => {
+      throw new Error(`Upload failed at storage PUT (part ${partNumber}): ${err?.message ?? err}. This is usually a CORS issue — visit /api/admin/setup-b2-cors to re-apply the bucket CORS policy.`);
     });
 
     if (!putRes.ok) {
