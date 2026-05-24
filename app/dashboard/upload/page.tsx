@@ -183,8 +183,7 @@ export default function UploadPage() {
         const mediaUrl = `${safeBase.replace(/\/+$/, "")}/${key}`;
 
         formData.set("mediaUrl", mediaUrl);
-        formData.set("mediaKey", key);
-        formData.set("mediaBucket", bucket);
+        formData.delete("file"); // already in B2 — don't send binary to server action
       }
 
       const result: any = await uploadContent(formData);
