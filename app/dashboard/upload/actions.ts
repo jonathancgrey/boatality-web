@@ -17,7 +17,9 @@ export async function uploadContent(formData: FormData) {
 
   const {
     data: { user },
+    error: authError,
   } = await supabase.auth.getUser();
+  console.log("[upload] auth:", user?.id ?? "null", authError?.message ?? "ok");
   if (!user) return { error: "Not logged in." };
 
   const channelId = formData.get("channelId")?.toString();
@@ -103,13 +105,14 @@ export async function uploadContent(formData: FormData) {
   }
 
   // Validate channel ownership
-  const { data: channel } = await supabase
+  const { data: channel, error: channelErr } = await supabase
     .from("channels_v2")
     .select("id,creator_id,type")
     .eq("id", channelId)
     .eq("creator_id", user.id)
     .maybeSingle();
 
+  console.log("[upload] channel:", channel?.id ?? "null", channelErr?.message ?? "ok");
   if (!channel) return { error: "Invalid channel." };
 
   // TEMP: keep thumbnail in Supabase storage until we move it to B2
@@ -151,13 +154,12 @@ export async function uploadContent(formData: FormData) {
     description,
     body: body ?? null,
     media_url: mediaUrl ?? null,
-    // Optional: keep key for debugging/migrations later (only if your table has the column)
-    // media_key: mediaKey,
     thumbnail_url: thumbnailUrl,
     category_id: primaryCategory || null,
     status: "draft",
   });
 
+  console.log("[upload] insert:", dbError ? `ERROR: ${dbError.message}` : "ok", contentId);
   if (dbError) return { error: dbError.message };
 
   revalidatePath("/dashboard/content");
