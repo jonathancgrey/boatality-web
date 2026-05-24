@@ -33,11 +33,15 @@ export async function GET() {
     const auth = await authRes.json();
     const { authorizationToken, apiUrl, accountId } = auth;
 
-    // 2. Find bucket ID by name
-    const listRes = await fetch(
-      `${apiUrl}/b2api/v2/b2_list_buckets?accountId=${accountId}&bucketName=${encodeURIComponent(bucket)}`,
-      { headers: { Authorization: authorizationToken } }
-    );
+    // 2. Find bucket ID by name (b2_list_buckets is POST with JSON body)
+    const listRes = await fetch(`${apiUrl}/b2api/v2/b2_list_buckets`, {
+      method: "POST",
+      headers: {
+        Authorization: authorizationToken,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ accountId, bucketName: bucket }),
+    });
 
     if (!listRes.ok) {
       throw new Error(`Failed to list B2 buckets (${listRes.status})`);
