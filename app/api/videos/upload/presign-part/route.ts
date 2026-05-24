@@ -1,7 +1,4 @@
 import { NextResponse } from "next/server";
-import { UploadPartCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { b2s3 } from "@/lib/b2s3";
 import { createServerClient } from "@/lib/supabaseServer";
 
 function getChannelIdFromKey(key: string) {
@@ -37,21 +34,13 @@ export async function POST(req: Request) {
 
     if (!channel) return NextResponse.json({ ok: false, error: "Invalid channel" }, { status: 403 });
 
-    const bucket = process.env.B2_BUCKET_NAME;
-    if (!bucket) return NextResponse.json({ ok: false, error: "Missing B2_BUCKET_NAME" }, { status: 500 });
+    const mediaBase = (process.env.NEXT_PUBLIC_MEDIA_BASE_URL || "https://media.boatality.com").replace(/\/+$/, "");
+    const url = `${mediaBase}/upload-part?key=${encodeURIComponent(key)}&uploadId=${encodeURIComponent(uploadId)}&partNumber=${Number(partNumber)}`;
 
-    const cmd = new UploadPartCommand({
-      Bucket: bucket,
-      Key: key,
-      UploadId: uploadId,
-      PartNumber: Number(partNumber),
-    });
-
-    const url = await getSignedUrl(b2s3, cmd, { expiresIn: 60 * 10 });
     return NextResponse.json({ ok: true, url });
   } catch (err: any) {
     return NextResponse.json(
-      { ok: false, name: err?.name ?? "B2Error", message: err?.message ?? String(err) },
+      { ok: false, name: err?.name ?? "UnknownError", message: err?.message ?? String(err) },
       { status: 500 }
     );
   }
