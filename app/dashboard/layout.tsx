@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabaseClient";
 import {
@@ -66,15 +67,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const supabase = createClient();
 
   const [email, setEmail] = useState<string | null>(null);
-  const [initials, setInitials] = useState("BG");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) { router.push("/login"); return; }
-      const e = data.user.email ?? null;
-      setEmail(e);
-      if (e) setInitials(e.slice(0, 2).toUpperCase());
+      setEmail(data.user.email ?? null);
     });
   }, []);
 
@@ -88,9 +86,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Logo */}
       <div className="px-5 py-5 border-b border-white/8">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-brand-orange flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
-            {initials}
-          </div>
+          <Image
+            src="/brand/boatality-icon.png"
+            alt="Boatality"
+            width={36}
+            height={36}
+            className="w-9 h-9 rounded-xl flex-shrink-0"
+          />
           <div className="min-w-0">
             <p className="text-sm font-semibold text-white truncate">Boatality Studio</p>
             <p className="text-[10px] text-white/40 truncate">{email ?? "Loading…"}</p>
