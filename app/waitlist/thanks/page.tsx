@@ -54,7 +54,7 @@ export default function WaitlistThanksPage() {
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
             <a
               href="/"
-              className="inline-flex items-center justify-center rounded-md bg-[#C84121] px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#b73327]"
+              className="inline-flex items-center justify-center rounded-md bg-brand-orange px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-brand-orange-hover"
             >
               Back to home
             </a>

@@ -99,7 +99,7 @@ export default function EditContentPage({
       {/* ambient */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute -top-40 -left-10 h-64 w-64 rounded-full bg-[#127AB2]/25 blur-3xl" />
-        <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-[#C84121]/25 blur-3xl" />
+        <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-brand-orange/25 blur-3xl" />
       </div>
 
       <Link
@@ -110,7 +110,7 @@ export default function EditContentPage({
         Back to details
       </Link>
 
-      <div className="mt-4 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#021521]/95 via-[#012C44]/90 to-[#050816]/95 shadow-2xl shadow-black/50 backdrop-blur-xl">
+      <div className="mt-4 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-surface-recessed/95 via-brand-navy/90 to-surface-recessed/95 shadow-2xl shadow-black/50 backdrop-blur-xl">
         <div className="px-6 py-6 md:px-10 md:py-8">
           <header className="space-y-2">
             <p className="inline-flex items-center rounded-full bg-white/5 px-3 py-1 text-[11px] font-medium text-sky-200/90 border border-white/10">

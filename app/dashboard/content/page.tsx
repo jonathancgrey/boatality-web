@@ -106,10 +106,10 @@ export default async function ContentLibraryPage({
       {/* Ambient background */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute -top-32 -left-24 h-80 w-80 rounded-full bg-[#127AB2]/20 blur-3xl" />
-        <div className="absolute -bottom-40 -right-10 h-96 w-96 rounded-full bg-[#C84121]/20 blur-3xl" />
+        <div className="absolute -bottom-40 -right-10 h-96 w-96 rounded-full bg-brand-orange/20 blur-3xl" />
       </div>
 
-      <div className="rounded-2xl md:rounded-[32px] border border-white/10 bg-gradient-to-br from-[#001522] via-[#012C44] to-[#000910] px-4 md:px-8 pb-8 pt-6 shadow-2xl shadow-black/40 backdrop-blur-2xl space-y-6 md:space-y-8">
+      <div className="rounded-2xl md:rounded-[32px] border border-white/10 bg-gradient-to-br from-surface-recessed via-brand-navy to-surface-recessed px-4 md:px-8 pb-8 pt-6 shadow-2xl shadow-black/40 backdrop-blur-2xl space-y-6 md:space-y-8">
 
         {/* Header */}
         <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
@@ -124,7 +124,7 @@ export default async function ContentLibraryPage({
           </div>
           <Link
             href="/dashboard/upload"
-            className="self-start inline-flex items-center gap-2 rounded-full bg-[#C84121] px-5 py-2.5 text-xs font-semibold text-white shadow-lg shadow-black/50 transition-all hover:-translate-y-0.5 hover:bg-[#a3321c] flex-shrink-0"
+            className="self-start inline-flex items-center gap-2 rounded-full bg-brand-orange px-5 py-2.5 text-xs font-semibold text-white shadow-lg shadow-black/50 transition-all hover:-translate-y-0.5 hover:bg-brand-orange-hover flex-shrink-0"
           >
             <UploadIcon className="h-4 w-4" />
             Upload

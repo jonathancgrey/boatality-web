@@ -164,7 +164,7 @@ export default async function ContentDetailsPage({
       {/* ambient glow */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute -top-40 -left-10 h-64 w-64 rounded-full bg-[#127AB2]/25 blur-3xl" />
-        <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-[#C84121]/25 blur-3xl" />
+        <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-brand-orange/25 blur-3xl" />
       </div>
 
       {/* Back link */}
@@ -177,7 +177,7 @@ export default async function ContentDetailsPage({
       </Link>
 
       {/* Main card */}
-      <div className="mt-4 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#021521]/95 via-[#012C44]/90 to-[#050816]/95 shadow-2xl shadow-black/50 backdrop-blur-xl">
+      <div className="mt-4 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-surface-recessed/95 via-brand-navy/90 to-surface-recessed/95 shadow-2xl shadow-black/50 backdrop-blur-xl">
         <div className="px-6 py-6 md:px-10 md:py-8">
           {/* Header row */}
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">

@@ -18,8 +18,8 @@ import { createClient } from "@/lib/supabaseClient";
 
 function Spinner() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-[#020b16]">
-      <div className="w-6 h-6 border-2 border-white/20 border-t-[#C84121] rounded-full animate-spin" />
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background">
+      <div className="w-6 h-6 border-2 border-white/20 border-t-brand-orange rounded-full animate-spin" />
       <p className="text-xs text-white/30">Verifying your reset link…</p>
     </div>
   );

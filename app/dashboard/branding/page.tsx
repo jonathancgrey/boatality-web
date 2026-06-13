@@ -167,7 +167,7 @@ function Field({
         )}
       </label>
       {prefix ? (
-        <div className="flex items-center rounded-xl bg-white/[0.06] border border-white/15 overflow-hidden focus-within:ring-2 focus-within:ring-[#C84121]/40 focus-within:border-[#C84121]/40 transition">
+        <div className="flex items-center rounded-xl bg-white/[0.06] border border-white/15 overflow-hidden focus-within:ring-2 focus-within:ring-brand-orange/40 focus-within:border-brand-orange/40 transition">
           <div className="pl-3.5 pr-2 text-white/35 flex-shrink-0">{prefix}</div>
           {children}
         </div>
@@ -179,7 +179,7 @@ function Field({
 }
 
 const inputBase =
-  "w-full rounded-xl bg-white/[0.06] border border-white/15 px-4 py-3 text-sm text-white placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-[#C84121]/40 focus:border-[#C84121]/40 transition";
+  "w-full rounded-xl bg-white/[0.06] border border-white/15 px-4 py-3 text-sm text-white placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-brand-orange/40 focus:border-brand-orange/40 transition";
 
 const prefixInputBase =
   "flex-1 bg-transparent border-0 py-3 pr-4 text-sm text-white placeholder-white/25 focus:outline-none";
@@ -496,7 +496,7 @@ export default function BrandingPage() {
         <button
           onClick={handleSave}
           disabled={saving || isAnyUploading}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#C84121] hover:bg-[#d94d2a] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors flex-shrink-0"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors flex-shrink-0"
         >
           {saving ? (
             <>
@@ -700,14 +700,14 @@ export default function BrandingPage() {
                 className={[
                   "relative flex flex-col items-center gap-2 rounded-xl border px-3 py-4 text-center transition-all duration-200 disabled:cursor-not-allowed",
                   isEnabled
-                    ? "border-[#C84121]/50 bg-[#C84121]/10 ring-1 ring-[#C84121]/20"
+                    ? "border-brand-orange/50 bg-brand-orange/10 ring-1 ring-brand-orange/20"
                     : "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.06]",
                 ].join(" ")}
               >
                 {/* Icon */}
                 <div className={[
                   "w-9 h-9 rounded-lg flex items-center justify-center transition-colors",
-                  isEnabled ? "bg-[#C84121] text-white" : "bg-white/10 text-white/40",
+                  isEnabled ? "bg-brand-orange text-white" : "bg-white/10 text-white/40",
                 ].join(" ")}>
                   {isLoading
                     ? <Loader2 size={16} className="animate-spin" />
@@ -726,7 +726,7 @@ export default function BrandingPage() {
                 <span className={[
                   "text-[9px] font-semibold uppercase tracking-widest px-1.5 py-0.5 rounded-full",
                   isEnabled
-                    ? "bg-[#C84121]/20 text-[#f4845f]"
+                    ? "bg-brand-orange/20 text-brand-orange-soft"
                     : "bg-white/5 text-white/25",
                 ].join(" ")}>
                   {isEnabled ? "On" : "Off"}
@@ -816,7 +816,7 @@ export default function BrandingPage() {
         <button
           onClick={handleSave}
           disabled={saving || isAnyUploading}
-          className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#C84121] hover:bg-[#d94d2a] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors"
+          className="flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors"
         >
           {saving ? (
             <>

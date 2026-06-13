@@ -5,15 +5,21 @@
      truth shared with RN constants/Colors.ts and the iOS Asset Catalog.
      Do not introduce new accent/background hexes; extend this set. */
   --brand-orange: #c84121;
+  --brand-orange-hover: #d94e2a; /* hover state for orange CTAs */
+  --brand-orange-soft: #f4845f;  /* readable orange tint for text/icons on dark */
   --brand-navy: #012c44;
   --brand-ocean: #127ab2;
   --brand-cloud: #f5f7fa;
-  /* Dark-background surface ramp (lightest → darkest) */
+  /* Dark-background surface ramp (Fix 04+05): three steps only.
+     recessed (sidebar/gradient edges) < base (app bg) < raised (cards/modals) */
+  --surface-recessed: #01202f;
+  --surface-base: var(--brand-navy);
+  --surface-raised: #0f3a50;
   --brand-navy-surface-1: #0f3a50;
   --brand-navy-surface-2: #0a4b70;
   --brand-navy-deep: #012c44;
 
-  --background: #020b16;
+  --background: var(--surface-base);
   --foreground: #ffffff;
   color-scheme: dark;
 }
@@ -22,9 +28,14 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-brand-orange: var(--brand-orange);
+  --color-brand-orange-hover: var(--brand-orange-hover);
+  --color-brand-orange-soft: var(--brand-orange-soft);
   --color-brand-navy: var(--brand-navy);
   --color-brand-ocean: var(--brand-ocean);
   --color-brand-cloud: var(--brand-cloud);
+  --color-surface-recessed: var(--surface-recessed);
+  --color-surface-base: var(--surface-base);
+  --color-surface-raised: var(--surface-raised);
   --font-sans: var(--font-poppins);
 }
 

@@ -114,7 +114,7 @@ function HomePageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F7FA] text-[#012C44]">
+    <div className="min-h-screen bg-[#F5F7FA] text-brand-navy">
       {/* Header aligned with marketing style */}
       <header className="sticky top-0 z-20 bg-[#F5F7FA]/90 backdrop-blur border-b border-slate-200">
         <div className="max-w-6xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
@@ -125,7 +125,7 @@ function HomePageContent() {
               className="h-10 w-10 rounded-xl"
             />
             <div className="leading-tight">
-              <div className="text-sm font-extrabold tracking-[0.12em] uppercase text-[#012C44]">
+              <div className="text-sm font-extrabold tracking-[0.12em] uppercase text-brand-navy">
                 Boatality
               </div>
               <div className="text-[11px] text-slate-600">
@@ -150,7 +150,7 @@ function HomePageContent() {
           {/* Left: marketing-aligned copy */}
           <section className="space-y-6">
             <div className="inline-flex items-center gap-2 rounded-full bg-white border border-slate-200 px-3 py-1 text-[11px] font-semibold text-slate-700">
-              <span className="inline-block h-2 w-2 rounded-full bg-[#C84121]" />
+              <span className="inline-block h-2 w-2 rounded-full bg-brand-orange" />
               Built for the water — not the algorithm
             </div>
 
@@ -332,7 +332,7 @@ function HomePageContent() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full mt-2 inline-flex items-center justify-center gap-2 rounded-2xl bg-[#C84121] px-5 py-3 text-sm font-extrabold text-white shadow-sm hover:bg-[#d75633] transition disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full mt-2 inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-orange px-5 py-3 text-sm font-extrabold text-white shadow-sm hover:bg-brand-orange-hover transition disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? "Submitting…" : "Request beta access"}
                   <ArrowRight className="h-4 w-4" />

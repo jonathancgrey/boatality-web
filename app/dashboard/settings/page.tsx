@@ -79,8 +79,8 @@ function ToggleRow({
         aria-checked={checked}
         onClick={() => !disabled && onChange(!checked)}
         disabled={disabled}
-        className={`relative flex-shrink-0 mt-0.5 w-10 h-6 rounded-full transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C84121]/50 disabled:opacity-40 disabled:cursor-not-allowed ${
-          checked ? "bg-[#C84121]" : "bg-white/15"
+        className={`relative flex-shrink-0 mt-0.5 w-10 h-6 rounded-full transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange/50 disabled:opacity-40 disabled:cursor-not-allowed ${
+          checked ? "bg-brand-orange" : "bg-white/15"
         }`}
       >
         <span
@@ -451,7 +451,7 @@ export default function SettingsPage() {
           />
 
           {/* Modal */}
-          <div className="relative w-full max-w-sm rounded-2xl border border-red-500/25 bg-[#0d1f2d] shadow-2xl shadow-black/60 p-6 space-y-5">
+          <div className="relative w-full max-w-sm rounded-2xl border border-red-500/25 bg-surface-raised shadow-2xl shadow-black/60 p-6 space-y-5">
             <div className="flex items-start gap-3">
               <div className="w-9 h-9 rounded-xl bg-red-500/15 border border-red-500/25 flex items-center justify-center flex-shrink-0">
                 <Trash2 className="h-4 w-4 text-red-400" />

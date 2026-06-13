@@ -40,12 +40,12 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#020b16] px-4">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8 gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-[#C84121]/20 border border-[#C84121]/30 flex items-center justify-center">
-            <Anchor className="h-6 w-6 text-[#C84121]" />
+          <div className="w-12 h-12 rounded-2xl bg-brand-orange/20 border border-brand-orange/30 flex items-center justify-center">
+            <Anchor className="h-6 w-6 text-brand-orange" />
           </div>
           <div className="text-center">
             <h1 className="text-xl font-bold text-white">Boatality Studio</h1>
@@ -113,7 +113,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#C84121] hover:bg-[#d94e2a] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-colors mt-2"
+            className="w-full bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-colors mt-2"
           >
             {loading ? "Signing in…" : "Sign in"}
           </button>
@@ -122,14 +122,14 @@ export default function LoginPage() {
         {/* First-time / no-password callout — always visible, elevated on failed login */}
         <div className={`mt-5 rounded-xl border px-4 py-3.5 transition-all ${
           showSetupHint
-            ? "bg-[#C84121]/10 border-[#C84121]/30"
+            ? "bg-brand-orange/10 border-brand-orange/30"
             : "bg-white/[0.03] border-white/10"
         }`}>
           <div className="flex items-start gap-3">
             <div className={`mt-0.5 flex-shrink-0 rounded-lg p-1.5 ${
-              showSetupHint ? "bg-[#C84121]/20" : "bg-white/5"
+              showSetupHint ? "bg-brand-orange/20" : "bg-white/5"
             }`}>
-              <KeyRound className={`h-3.5 w-3.5 ${showSetupHint ? "text-[#C84121]" : "text-white/40"}`} />
+              <KeyRound className={`h-3.5 w-3.5 ${showSetupHint ? "text-brand-orange" : "text-white/40"}`} />
             </div>
             <div className="min-w-0">
               <p className={`text-xs font-semibold ${showSetupHint ? "text-white/90" : "text-white/55"}`}>
@@ -144,7 +144,7 @@ export default function LoginPage() {
                 href="/forgot-password"
                 className={`inline-block mt-2 text-xs font-semibold underline underline-offset-2 transition-colors ${
                   showSetupHint
-                    ? "text-[#f4845f] hover:text-[#C84121]"
+                    ? "text-brand-orange-soft hover:text-brand-orange"
                     : "text-white/40 hover:text-white/70"
                 }`}
               >

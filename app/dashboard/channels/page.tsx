@@ -109,7 +109,7 @@ export default function ChannelsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen px-4 md:px-0 py-10 bg-[#020b16] bg-noise">
+      <div className="min-h-screen px-4 md:px-0 py-10 bg-background bg-noise">
         <div className="max-w-3xl mx-auto rounded-3xl bg-white/5 border border-white/10 p-8 text-slate-200">
           Loading channel management…
         </div>
@@ -118,7 +118,7 @@ export default function ChannelsPage() {
   }
 
   return (
-    <div className="min-h-screen px-4 md:px-0 py-10 bg-[#020b16] bg-noise animate-fade-slide-up">
+    <div className="min-h-screen px-4 md:px-0 py-10 bg-background bg-noise animate-fade-slide-up">
       <div className="max-w-3xl mx-auto rounded-3xl bg-white/5 border border-white/10 shadow-2xl shadow-black/40 backdrop-blur-2xl p-8 space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-slate-50 tracking-tight">Channel Management</h1>

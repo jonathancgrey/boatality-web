@@ -59,19 +59,19 @@ export default function SetPasswordPage() {
 
   if (checking) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#020b16]">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="w-6 h-6 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#020b16] px-4">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8 gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-[#C84121]/20 border border-[#C84121]/30 flex items-center justify-center">
-            <Anchor className="h-6 w-6 text-[#C84121]" />
+          <div className="w-12 h-12 rounded-2xl bg-brand-orange/20 border border-brand-orange/30 flex items-center justify-center">
+            <Anchor className="h-6 w-6 text-brand-orange" />
           </div>
           <div className="text-center">
             <h1 className="text-xl font-bold text-white">Welcome aboard</h1>
@@ -153,7 +153,7 @@ export default function SetPasswordPage() {
           <button
             type="submit"
             disabled={loading || !strong || !matches}
-            className="w-full bg-[#C84121] hover:bg-[#d94e2a] disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-colors mt-2"
+            className="w-full bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-colors mt-2"
           >
             {loading ? "Saving…" : "Set password & continue"}
           </button>

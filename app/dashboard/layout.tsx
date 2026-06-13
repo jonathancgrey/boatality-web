@@ -84,11 +84,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   const Sidebar = () => (
-    <aside className="flex flex-col h-full bg-[#010d18] border-r border-white/8 w-56 flex-shrink-0">
+    <aside className="flex flex-col h-full bg-surface-recessed border-r border-white/8 w-56 flex-shrink-0">
       {/* Logo */}
       <div className="px-5 py-5 border-b border-white/8">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[#C84121] flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-brand-orange flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
             {initials}
           </div>
           <div className="min-w-0">
@@ -160,7 +160,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   );
 
   return (
-    <div className="flex h-screen bg-[#020b16] text-white overflow-hidden">
+    <div className="flex h-screen bg-background text-white overflow-hidden">
       {/* Desktop sidebar */}
       <div className="hidden md:flex">
         <Sidebar />
@@ -188,8 +188,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         <main className="flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-8">
           {/* Pre-launch beta banner */}
-          <div className="mb-6 flex items-start gap-3 rounded-xl border border-[#C84121]/30 bg-[#C84121]/8 px-4 py-3.5">
-            <Rocket className="h-4 w-4 text-[#f4845f] flex-shrink-0 mt-0.5" />
+          <div className="mb-6 flex items-start gap-3 rounded-xl border border-brand-orange/30 bg-brand-orange/8 px-4 py-3.5">
+            <Rocket className="h-4 w-4 text-brand-orange-soft flex-shrink-0 mt-0.5" />
             <div className="min-w-0">
               <p className="text-sm font-semibold text-white/90">You're in pre-launch beta</p>
               <p className="text-xs text-white/45 mt-0.5 leading-relaxed">

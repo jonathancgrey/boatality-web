@@ -44,13 +44,13 @@ const CONTENT_TYPES = [
 type ContentTypeValue = "video" | "podcast" | "article";
 
 // Opaque dark background so the select renders correctly on all browsers/OS
-const selectStyle = { backgroundColor: "#0d1f2d" };
+const selectStyle = { backgroundColor: "var(--surface-raised)" };
 
 const inputBase =
-  "w-full rounded-xl bg-white/[0.06] border border-white/15 px-4 py-3 text-sm text-white placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-[#C84121]/40 focus:border-[#C84121]/40 transition";
+  "w-full rounded-xl bg-white/[0.06] border border-white/15 px-4 py-3 text-sm text-white placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-brand-orange/40 focus:border-brand-orange/40 transition";
 
 const selectBase =
-  "w-full rounded-xl border border-white/15 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#C84121]/40 focus:border-[#C84121]/40 transition appearance-none";
+  "w-full rounded-xl border border-white/15 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-orange/40 focus:border-brand-orange/40 transition appearance-none";
 
 function Field({
   label,
@@ -230,7 +230,7 @@ export default function UploadPage() {
               className={[
                 "flex flex-col items-center gap-2 rounded-xl border px-3 py-4 text-center transition-all",
                 contentType === value
-                  ? "border-[#C84121]/50 bg-[#C84121]/10 ring-1 ring-[#C84121]/20"
+                  ? "border-brand-orange/50 bg-brand-orange/10 ring-1 ring-brand-orange/20"
                   : "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.06]",
               ].join(" ")}
             >
@@ -238,7 +238,7 @@ export default function UploadPage() {
                 className={[
                   "w-9 h-9 rounded-lg flex items-center justify-center transition-colors",
                   contentType === value
-                    ? "bg-[#C84121] text-white"
+                    ? "bg-brand-orange text-white"
                     : "bg-white/10 text-white/40",
                 ].join(" ")}
               >
@@ -307,7 +307,7 @@ export default function UploadPage() {
               className={[
                 "rounded-2xl border-2 border-dashed px-6 py-8 text-center cursor-pointer transition-all",
                 fileName
-                  ? "border-[#C84121]/40 bg-[#C84121]/[0.06]"
+                  ? "border-brand-orange/40 bg-brand-orange/[0.06]"
                   : "border-white/15 bg-white/[0.03] hover:border-white/25 hover:bg-white/[0.06]",
               ].join(" ")}
               onClick={() => fileInputRef.current?.click()}
@@ -331,7 +331,7 @@ export default function UploadPage() {
                 className={[
                   "mx-auto mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl",
                   fileName
-                    ? "bg-[#C84121]/20 text-[#f4845f]"
+                    ? "bg-brand-orange/20 text-brand-orange-soft"
                     : "bg-white/8 text-white/30",
                 ].join(" ")}
               >
@@ -387,14 +387,14 @@ export default function UploadPage() {
                 className={selectBase}
                 style={selectStyle}
               >
-                <option value="" style={{ backgroundColor: "#0d1f2d" }}>
+                <option value="" style={{ backgroundColor: "var(--surface-raised)" }}>
                   Select a category…
                 </option>
                 {categories.map((cat: any) => (
                   <option
                     key={cat.id}
                     value={cat.id}
-                    style={{ backgroundColor: "#0d1f2d" }}
+                    style={{ backgroundColor: "var(--surface-raised)" }}
                   >
                     {cat.name}
                   </option>
@@ -424,7 +424,7 @@ export default function UploadPage() {
             </div>
             <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
               <div
-                className="h-full bg-[#C84121] rounded-full transition-all duration-300"
+                className="h-full bg-brand-orange rounded-full transition-all duration-300"
                 style={{ width: `${uploadPct}%` }}
               />
             </div>
@@ -453,7 +453,7 @@ export default function UploadPage() {
         <button
           type="submit"
           disabled={isUploading || !matchedChannel}
-          className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#C84121] hover:bg-[#d94d2a] disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold py-3 transition-colors"
+          className="w-full flex items-center justify-center gap-2 rounded-xl bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold py-3 transition-colors"
         >
           {isUploading ? (
             <>

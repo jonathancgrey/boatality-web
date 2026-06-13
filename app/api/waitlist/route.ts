@@ -192,7 +192,7 @@ export async function POST(req: Request) {
         to: "jonathan.c.greviskis@gmail.com",
         subject: `New waitlist signup — ${name ?? email}`,
         html: `
-          <div style="font-family:system-ui,sans-serif;max-width:480px;padding:24px;background:#0d1f2d;color:#fff;border-radius:12px;">
+          <div style="font-family:system-ui,sans-serif;max-width:480px;padding:24px;background:#0f3a50;color:#fff;border-radius:12px;">
             <p style="margin:0 0 4px;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.4);">New signup</p>
             <h2 style="margin:0 0 20px;font-size:20px;font-weight:700;">${name ?? "(no name)"}</h2>
             <p style="margin:0 0 8px;font-size:14px;color:rgba(255,255,255,.75);"><strong>Email:</strong> ${email}</p>

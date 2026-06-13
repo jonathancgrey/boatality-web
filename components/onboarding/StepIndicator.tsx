@@ -31,7 +31,7 @@ export function StepIndicator() {
                   done
                     ? "bg-blue-500 text-white"
                     : active
-                    ? "bg-white text-[#020b16] ring-4 ring-white/20"
+                    ? "bg-white text-brand-navy ring-4 ring-white/20"
                     : "bg-white/10 text-white/30",
                 ].join(" ")}
               >

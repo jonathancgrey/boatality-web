@@ -105,7 +105,7 @@ export default function AdminPanel({ initial }: { initial: Signup[] }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#020b16] text-white px-4 py-10">
+    <div className="min-h-screen bg-background text-white px-4 py-10">
       <div className="max-w-5xl mx-auto space-y-6">
 
         {/* Header */}
