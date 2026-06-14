@@ -4,7 +4,7 @@
   /* Canonical Boatality brand palette (Brand Fix 01) — single source of
      truth shared with RN constants/Colors.ts and the iOS Asset Catalog.
      Do not introduce new accent/background hexes; extend this set. */
-  --brand-orange: #c84121;
+  --brand-orange: #c84021;
   --brand-orange-hover: #d94e2a; /* hover state for orange CTAs */
   --brand-orange-soft: #f4845f;  /* readable orange tint for text/icons on dark */
   --brand-navy: #012c44;
@@ -97,7 +97,7 @@ body {
 }
 
 .glow-hover:hover {
-  box-shadow: 0 0 18px rgba(200, 65, 33, 0.35);
+  box-shadow: 0 0 18px rgba(200, 64, 33, 0.35);
 }
 
 /* Tap scale */

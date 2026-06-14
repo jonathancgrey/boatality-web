@@ -163,7 +163,7 @@ export default async function ContentDetailsPage({
     <div className="relative max-w-5xl mx-auto py-8">
       {/* ambient glow */}
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -top-40 -left-10 h-64 w-64 rounded-full bg-[#127AB2]/25 blur-3xl" />
+        <div className="absolute -top-40 -left-10 h-64 w-64 rounded-full bg-brand-ocean/25 blur-3xl" />
         <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-brand-orange/25 blur-3xl" />
       </div>
 

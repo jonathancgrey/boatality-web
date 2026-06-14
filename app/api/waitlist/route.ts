@@ -200,7 +200,7 @@ export async function POST(req: Request) {
             ${source ? `<p style="margin:0 0 8px;font-size:14px;color:rgba(255,255,255,.75);"><strong>Source:</strong> ${source}</p>` : ""}
             ${creatorLinksHtml}
             <div style="margin-top:24px;">
-              <a href="https://studio.boatality.com/admin" style="display:inline-block;background:#C84121;color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 24px;border-radius:8px;">
+              <a href="https://studio.boatality.com/admin" style="display:inline-block;background:#C84021;color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 24px;border-radius:8px;">
                 Review in admin →
               </a>
             </div>
