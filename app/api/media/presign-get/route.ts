@@ -3,6 +3,7 @@ import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { b2s3 } from "@/lib/b2s3";
 import { supabaseRoute } from "@/lib/supabaseRoute";
+import { slugify } from "@/utils/slugify";
 
 export async function POST(req: Request) {
   // Require authentication
@@ -42,23 +43,26 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });
     }
   } else {
-    // Channel content: extract slug and verify creator ownership
+    // Channel content: extract slug and verify creator ownership.
+    // Object keys are built as channels/{slugify(channel.name)}/..., so match
+    // the slug against the slugified names of channels this user owns.
     const channelSlugMatch = /^channels\/([^/]+)\//.exec(key);
-    if (channelSlugMatch) {
-      const slug = channelSlugMatch[1];
-      // channels_v2 doesn't have a slug column yet — fall back to
-      // verifying the user has at least one channel (prevents anonymous access).
-      // TODO: add slug column to channels_v2 for exact ownership check.
-      const { data: channel } = await supabase
-        .from("channels_v2")
-        .select("id")
-        .eq("creator_id", user.id)
-        .limit(1)
-        .maybeSingle();
+    if (!channelSlugMatch) {
+      return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });
+    }
 
-      if (!channel) {
-        return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });
-      }
+    const slug = channelSlugMatch[1];
+    const { data: channels } = await supabase
+      .from("channels_v2")
+      .select("id, name")
+      .eq("creator_id", user.id);
+
+    const owned = (channels ?? []).some(
+      (c) => slugify(c.name ?? "") === slug || c.id === slug
+    );
+
+    if (!owned) {
+      return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });
     }
   }
 

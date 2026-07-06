@@ -8,6 +8,15 @@ function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+function escapeHtml(v: string) {
+  return v
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
 function safeString(v: unknown) {
   const s = String(v ?? "").trim();
   return s.length ? s : null;
@@ -15,8 +24,29 @@ function safeString(v: unknown) {
 
 function normalizeRole(roleRaw: string | null) {
   const r = (roleRaw ?? "viewer").trim().toLowerCase();
-  if (r === "creator" || r === "viewer" || r === "both") return r;
+  if (r === "creator" || r === "viewer" || r === "both" || r === "brand") return r;
   return "viewer";
+}
+
+// The static landing page at boatality.com posts here cross-origin.
+const ALLOWED_ORIGINS = [
+  "https://boatality.com",
+  "https://www.boatality.com",
+];
+
+function corsHeaders(req: Request): Record<string, string> {
+  const origin = req.headers.get("origin") ?? "";
+  if (!ALLOWED_ORIGINS.includes(origin)) return {};
+  return {
+    "Access-Control-Allow-Origin": origin,
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "content-type",
+    Vary: "Origin",
+  };
+}
+
+export async function OPTIONS(req: Request) {
+  return new Response(null, { status: 204, headers: corsHeaders(req) });
 }
 
 function normalizePlatform(pRaw: string | null) {
@@ -57,9 +87,13 @@ function normalizeCreatorLinks(input: unknown): { type: string; url: string }[] 
 }
 
 export async function POST(req: Request) {
+  const cors = corsHeaders(req);
   try {
     // Support both JSON fetch() and <form> FormData submissions
     const contentType = req.headers.get("content-type") || "";
+    const isFormPost =
+      contentType.includes("multipart/form-data") ||
+      contentType.includes("application/x-www-form-urlencoded");
 
     let body: any = {};
     if (contentType.includes("application/json")) {
@@ -123,7 +157,7 @@ export async function POST(req: Request) {
     const source = safeString(body?.source) ?? "web";
 
     if (!email || !isValidEmail(email)) {
-      return NextResponse.json({ ok: false, error: "Invalid email" }, { status: 400 });
+      return NextResponse.json({ ok: false, error: "Invalid email" }, { status: 400, headers: cors });
     }
 
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -132,7 +166,7 @@ export async function POST(req: Request) {
     if (!url || !serviceKey) {
       return NextResponse.json(
         { ok: false, error: "Server misconfigured" },
-        { status: 500 }
+        { status: 500, headers: cors }
       );
     }
 
@@ -140,24 +174,36 @@ export async function POST(req: Request) {
       auth: { persistSession: false },
     });
 
-    const { error } = await supabase
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://studio.boatality.com";
+
+    // Resubmitting an existing email must not reset its status (e.g. back to
+    // "pending" after an invite) or re-trigger emails.
+    const { data: existing } = await supabase
       .from("beta_signups")
-      .upsert(
-        {
-          email,
-          name,
-          role,
-          platform,
-          device_type,
-          creator_links,
-          source,
-          status: "pending",
-        },
-        { onConflict: "email" }
-      );
+      .select("id")
+      .eq("email", email)
+      .maybeSingle();
+
+    if (existing) {
+      if (isFormPost) {
+        return NextResponse.redirect(`${siteUrl}/waitlist/thanks`, 303);
+      }
+      return NextResponse.json({ ok: true, already: true }, { headers: cors });
+    }
+
+    const { error } = await supabase.from("beta_signups").insert({
+      email,
+      name,
+      role,
+      platform,
+      device_type,
+      creator_links,
+      source,
+      status: "pending",
+    });
 
     if (error) {
-      return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+      return NextResponse.json({ ok: false, error: error.message }, { status: 500, headers: cors });
     }
 
     const resend = new Resend(process.env.RESEND_API_KEY);
@@ -184,7 +230,7 @@ export async function POST(req: Request) {
     try {
       const roleLabel = role === "creator" ? "🎬 Creator" : role === "both" ? "🎬👀 Creator + Viewer" : "👀 Viewer";
       const creatorLinksHtml = creator_links?.length
-        ? `<p style="margin:8px 0 0;"><strong>Links:</strong> ${creator_links.map((l: any) => `<a href="${l.url}">${l.url}</a>`).join(", ")}</p>`
+        ? `<p style="margin:8px 0 0;"><strong>Links:</strong> ${creator_links.map((l: any) => `<a href="${escapeHtml(l.url)}">${escapeHtml(l.url)}</a>`).join(", ")}</p>`
         : "";
 
       await resend.emails.send({
@@ -194,10 +240,10 @@ export async function POST(req: Request) {
         html: `
           <div style="font-family:system-ui,sans-serif;max-width:480px;padding:24px;background:#0f3a50;color:#fff;border-radius:12px;">
             <p style="margin:0 0 4px;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.4);">New signup</p>
-            <h2 style="margin:0 0 20px;font-size:20px;font-weight:700;">${name ?? "(no name)"}</h2>
-            <p style="margin:0 0 8px;font-size:14px;color:rgba(255,255,255,.75);"><strong>Email:</strong> ${email}</p>
+            <h2 style="margin:0 0 20px;font-size:20px;font-weight:700;">${escapeHtml(name ?? "(no name)")}</h2>
+            <p style="margin:0 0 8px;font-size:14px;color:rgba(255,255,255,.75);"><strong>Email:</strong> ${escapeHtml(email)}</p>
             <p style="margin:0 0 8px;font-size:14px;color:rgba(255,255,255,.75);"><strong>Role:</strong> ${roleLabel}</p>
-            ${source ? `<p style="margin:0 0 8px;font-size:14px;color:rgba(255,255,255,.75);"><strong>Source:</strong> ${source}</p>` : ""}
+            ${source ? `<p style="margin:0 0 8px;font-size:14px;color:rgba(255,255,255,.75);"><strong>Source:</strong> ${escapeHtml(source)}</p>` : ""}
             ${creatorLinksHtml}
             <div style="margin-top:24px;">
               <a href="https://studio.boatality.com/admin" style="display:inline-block;background:#C84021;color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 24px;border-radius:8px;">
@@ -211,11 +257,14 @@ export async function POST(req: Request) {
       // Notification failure is silent — never block the signup
     }
 
-    return NextResponse.json({ ok: true });
+    if (isFormPost) {
+      return NextResponse.redirect(`${siteUrl}/waitlist/thanks`, 303);
+    }
+    return NextResponse.json({ ok: true }, { headers: cors });
   } catch (e: any) {
     return NextResponse.json(
       { ok: false, error: e?.message || "Unknown error" },
-      { status: 500 }
+      { status: 500, headers: cors }
     );
   }
 }

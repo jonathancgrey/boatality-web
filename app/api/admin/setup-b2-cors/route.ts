@@ -1,4 +1,26 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { createServerClient } from "@supabase/ssr";
+
+const ADMIN_EMAILS = ["jonathan.c.greviskis@gmail.com"];
+
+async function getCallerEmail(): Promise<string | null> {
+  const cookieStore = cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll() {},
+      },
+    }
+  );
+  const { data: { user } } = await supabase.auth.getUser();
+  return user?.email ?? null;
+}
 
 // One-shot route: GET /api/admin/setup-b2-cors
 // Sets CORS on the B2 bucket using the native B2 API (b2_update_bucket).
@@ -6,6 +28,11 @@ import { NextResponse } from "next/server";
 // uploads on B2 — the native API with s3_put in allowedOperations is required.
 // Safe to call multiple times — idempotent.
 export async function GET() {
+  const callerEmail = await getCallerEmail();
+  if (!callerEmail || !ADMIN_EMAILS.includes(callerEmail)) {
+    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 403 });
+  }
+
   const bucket = process.env.B2_BUCKET_NAME;
   const keyId = process.env.B2_ACCESS_KEY_ID;
   const appKey = process.env.B2_SECRET_ACCESS_KEY;

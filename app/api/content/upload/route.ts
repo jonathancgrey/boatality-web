@@ -4,6 +4,14 @@ import { slugify } from "@/utils/slugify";
 
 export async function POST(req: Request) {
   try {
+    const authClient = supabaseServer();
+    const {
+      data: { user },
+    } = await authClient.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Not logged in." }, { status: 401 });
+    }
+
     const formData = await req.formData();
 
     const file = formData.get("file") as File | null;
@@ -28,11 +36,12 @@ export async function POST(req: Request) {
 
     const supabase = supabaseServer();
 
-    // Fetch channel to get name + creator_id
+    // Fetch channel to get name + creator_id — must belong to the caller
     const { data: channel, error: channelError } = await supabase
       .from("channels_v2")
       .select("id, name, creator_id")
       .eq("id", channelId)
+      .eq("creator_id", user.id)
       .single();
 
     if (channelError || !channel) {

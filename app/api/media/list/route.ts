@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { b2s3 } from "@/lib/b2s3";
 import { supabaseRoute } from "@/lib/supabaseRoute";
+import { slugify } from "@/utils/slugify";
 
 export async function POST(req: Request) {
   // Require authentication
@@ -32,16 +33,25 @@ export async function POST(req: Request) {
         return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });
       }
     } else {
-      // For channel paths, verify the user has at least one channel (basic guard).
-      // TODO: tighten once channels_v2 has a slug column.
-      const { data: channel } = await supabase
-        .from("channels_v2")
-        .select("id")
-        .eq("creator_id", user.id)
-        .limit(1)
-        .maybeSingle();
+      // Channel paths: the prefix segment is either the channel id (multipart
+      // video uploads) or slugify(channel.name) (storage uploads). Require an
+      // exact match against a channel this user owns.
+      const channelMatch = /^channels\/([^/]+)/.exec(prefix);
+      if (!channelMatch) {
+        return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });
+      }
 
-      if (!channel) {
+      const seg = channelMatch[1];
+      const { data: channels } = await supabase
+        .from("channels_v2")
+        .select("id, name")
+        .eq("creator_id", user.id);
+
+      const owned = (channels ?? []).some(
+        (c) => slugify(c.name ?? "") === seg || c.id === seg
+      );
+
+      if (!owned) {
         return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });
       }
     }
