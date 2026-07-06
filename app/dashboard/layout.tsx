@@ -67,12 +67,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const supabase = createClient();
 
   const [email, setEmail] = useState<string | null>(null);
+  const [isFounding, setIsFounding] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) { router.push("/login"); return; }
       setEmail(data.user.email ?? null);
+
+      supabase
+        .from("creators_v2")
+        .select("is_founding")
+        .eq("id", data.user.id)
+        .maybeSingle()
+        .then(({ data: creator }) => setIsFounding(!!creator?.is_founding));
     });
   }, []);
 
@@ -96,6 +104,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="min-w-0">
             <p className="text-sm font-semibold text-white truncate">Boatality Studio</p>
             <p className="text-[10px] text-white/40 truncate">{email ?? "Loading…"}</p>
+            {isFounding && (
+              <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-brand-orange/40 bg-brand-orange/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em] text-brand-orange-soft">
+                ⚓ Founding Creator
+              </span>
+            )}
           </div>
         </div>
       </div>

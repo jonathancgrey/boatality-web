@@ -15,6 +15,7 @@ type LibraryItem = {
   type: "video" | "podcast" | "article" | string;
   status: string | null;
   created_at: string;
+  view_count?: number | null;
   channels_v2?: { name?: string | null }[] | null;
 };
 
@@ -53,6 +54,7 @@ export default async function ContentLibraryPage({
       type,
       status,
       created_at,
+      view_count,
       channels_v2 ( name )
     `
     )
@@ -247,6 +249,9 @@ export default async function ContentLibraryPage({
                         <div className="mt-1 flex items-center gap-2 flex-wrap">
                           <TypeBadge type={item.type} />
                           <StatusBadge status={item.status} />
+                          <span className="text-[11px] text-slate-300/60 tabular-nums">
+                            {(item.view_count ?? 0).toLocaleString()} views
+                          </span>
                         </div>
                       </div>
 
@@ -266,6 +271,7 @@ export default async function ContentLibraryPage({
                       {activeType === "all" && <th className="px-4 py-3 font-medium">Type</th>}
                       <th className="px-4 py-3 font-medium">Channel</th>
                       <th className="px-4 py-3 font-medium">Status</th>
+                      <th className="px-4 py-3 font-medium text-right">Views</th>
                       <th className="px-4 py-3 font-medium">Created</th>
                       <th className="px-4 py-3 font-medium text-right">Open</th>
                     </tr>
@@ -316,6 +322,9 @@ export default async function ContentLibraryPage({
                         </td>
                         <td className="px-4 py-3 align-middle">
                           <StatusBadge status={item.status} />
+                        </td>
+                        <td className="px-4 py-3 align-middle text-right text-[13px] tabular-nums text-slate-200/70">
+                          {(item.view_count ?? 0).toLocaleString()}
                         </td>
                         <td className="px-4 py-3 align-middle text-[11px] text-slate-300/60">
                           {new Date(item.created_at).toLocaleDateString()}

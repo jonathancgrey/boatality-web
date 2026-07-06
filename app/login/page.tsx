@@ -49,7 +49,7 @@ export default function LoginPage() {
           </div>
           <div className="text-center">
             <h1 className="text-xl font-bold text-white">Boatality Studio</h1>
-            <p className="text-sm text-white/40 mt-0.5">Sign in to your creator account</p>
+            <p className="text-sm text-white/40 mt-0.5">Welcome back, founding creator.</p>
           </div>
         </div>
 
@@ -162,6 +162,17 @@ export default function LoginPage() {
           >
             Apply for beta access
           </a>
+        </p>
+
+        <p className="text-center text-xs text-white/25 mt-2">
+          Stuck? Email{" "}
+          <a
+            href="mailto:jonathan@boatality.com"
+            className="text-white/40 hover:text-white/60 underline underline-offset-2 transition-colors"
+          >
+            jonathan@boatality.com
+          </a>{" "}
+          — real human, fast replies.
         </p>
       </div>
     </div>

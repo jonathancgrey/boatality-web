@@ -156,6 +156,9 @@ export async function POST(req: Request) {
 
     const source = safeString(body?.source) ?? "web";
 
+    // Referral attribution: creator referral code from ?ref= links
+    const referred_by_code = safeString(body?.ref) ?? safeString(body?.referredBy);
+
     if (!email || !isValidEmail(email)) {
       return NextResponse.json({ ok: false, error: "Invalid email" }, { status: 400, headers: cors });
     }
@@ -199,6 +202,7 @@ export async function POST(req: Request) {
       device_type,
       creator_links,
       source,
+      referred_by_code,
       status: "pending",
     });
 
