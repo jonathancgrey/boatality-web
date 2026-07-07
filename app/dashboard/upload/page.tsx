@@ -214,6 +214,12 @@ export default function UploadPage() {
         <p className="text-sm text-white/45 mt-1">
           Add a new video, podcast, or article to your library.
         </p>
+        <a
+          href="/dashboard/upload/bulk"
+          className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-brand-orange-soft hover:text-brand-orange transition-colors"
+        >
+          Bringing your back catalog over? Bulk upload →
+        </a>
       </div>
 
       {/* Content type selector */}
